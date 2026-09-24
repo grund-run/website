@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1.7
+#
+# Packages the static musl binary that CI already built and tested. Nothing is
+# compiled here: the image holds exactly the artifact the contract ran against.
+#
+# No CA bundle, unlike the usual grund image: this server makes no outbound
+# connection, so it has no certificates to verify. Add one the day it does.
+FROM scratch
+COPY grund-website /grund-website
+# Numeric because scratch has no /etc/passwd.
+USER 65532:65532
+ENV GRUND_WEBSITE_LISTEN=0.0.0.0:8080 \
+    GRUND_WEBSITE_LOG_FORMAT=json
+EXPOSE 8080
+ENTRYPOINT ["/grund-website"]

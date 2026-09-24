@@ -1,0 +1,494 @@
+//! The embedded site: a sorted, immutable table of files built by `build.rs`.
+//!
+//! Everything here is pure. Resolving a request path, choosing an encoding and
+//! deciding a cache policy do no I/O, so they are tested directly and the HTTP
+//! layer in `api.rs` only turns the answers into responses.
+//!
+//! Path traversal is impossible by construction rather than by filtering: a
+//! path can only ever name an entry in the table, and the table holds exactly
+//! the files that were under `site/` at build time. The segment checks below
+//! exist so that odd spellings (`..`, `%2e%2e`, `a//b`, `\`) are a plain 404
+//! instead of depending on how a lookup happens to normalise them.
+
+use percent_encoding::percent_decode_str;
+
+use crate::state::State;
+
+/// One file of the site, with its precompressed variants.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Entry {
+    /// URL path without the leading slash, e.g. `assets/app-3f9a1c.css`.
+    pub path: &'static str,
+    pub content_type: &'static str,
+    /// First 128 bits of the SHA-256 of the identity bytes, hex.
+    pub hash: &'static str,
+    pub identity: &'static [u8],
+    pub br: Option<&'static [u8]>,
+    pub gzip: Option<&'static [u8]>,
+}
+
+mod embedded {
+    use super::Entry;
+    include!(concat!(env!("OUT_DIR"), "/site_entries.rs"));
+}
+
+/// The build that produced this binary: the commit, and a digest of every
+/// embedded path and hash. Readiness reports both, which is how a deployment is
+/// proven from the live origin rather than inferred from a tag.
+pub const REVISION: &str = embedded::REVISION;
+
+/// Files under this prefix must have content-hashed names, and are served as
+/// immutable for a year. Everything else revalidates on every use.
+pub const IMMUTABLE_PREFIX: &str = "assets/";
+
+#[derive(Clone, Copy)]
+pub struct Site {
+    entries: &'static [Entry],
+    digest: &'static str,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Resolution {
+    Found(&'static Entry),
+    /// `/docs` when only `docs/index.html` exists: redirect to `/docs/` so
+    /// relative links in that document resolve against the right base.
+    AddSlash,
+    NotFound,
+}
+
+impl Site {
+    pub fn embedded() -> Self {
+        Self::new(embedded::ENTRIES, embedded::SITE_DIGEST)
+    }
+
+    /// `entries` must be sorted by path; `build.rs` guarantees it for the
+    /// embedded table.
+    pub const fn new(entries: &'static [Entry], digest: &'static str) -> Self {
+        Self { entries, digest }
+    }
+
+    pub fn digest(&self) -> &'static str {
+        self.digest
+    }
+
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    #[cfg(test)]
+    pub fn entries(&self) -> &'static [Entry] {
+        self.entries
+    }
+
+    pub fn get(&self, path: &str) -> Option<&'static Entry> {
+        self.entries
+            .binary_search_by(|entry| entry.path.cmp(path))
+            .ok()
+            .map(|index| &self.entries[index])
+    }
+
+    /// The document served, with status 404, for any path that resolves to
+    /// nothing. `build.rs` refuses to build a site without one.
+    pub fn not_found_document(&self) -> Option<&'static Entry> {
+        self.get("404.html")
+    }
+
+    /// Maps a raw (still percent-encoded) request path to an entry.
+    ///
+    /// `/` and `/dir/` serve `index.html` / `dir/index.html`; `/page` serves
+    /// `page` or `page.html`; `/dir` redirects to `/dir/` when only
+    /// `dir/index.html` exists.
+    pub fn resolve(&self, raw_path: &str) -> Resolution {
+        let Some(key) = normalise(raw_path) else {
+            return Resolution::NotFound;
+        };
+        if key.is_empty() {
+            return self.found(self.get("index.html"));
+        }
+        if let Some(dir) = key.strip_suffix('/') {
+            return self.found(self.get(&format!("{dir}/index.html")));
+        }
+        if let Some(entry) = self.get(&key) {
+            return Resolution::Found(entry);
+        }
+        if let Some(entry) = self.get(&format!("{key}.html")) {
+            return Resolution::Found(entry);
+        }
+        if self.get(&format!("{key}/index.html")).is_some() {
+            return Resolution::AddSlash;
+        }
+        Resolution::NotFound
+    }
+
+    fn found(&self, entry: Option<&'static Entry>) -> Resolution {
+        entry.map_or(Resolution::NotFound, Resolution::Found)
+    }
+}
+
+/// Decodes the path and checks every segment. Returns the path without its
+/// leading slash (keeping a trailing one), or `None` for anything that is not
+/// a plain path to a file.
+fn normalise(raw_path: &str) -> Option<String> {
+    let decoded = percent_decode_str(raw_path).decode_utf8().ok()?;
+    let rest = decoded.strip_prefix('/')?;
+    if rest.is_empty() {
+        return Some(String::new());
+    }
+    let body = rest.strip_suffix('/').unwrap_or(rest);
+    let plain = body.split('/').all(|segment| {
+        !segment.is_empty()
+            && segment != "."
+            && segment != ".."
+            && !segment.contains(['\\', '\0'])
+            && !segment.chars().any(char::is_control)
+    });
+    plain.then(|| rest.to_string())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Encoding {
+    Brotli,
+    Gzip,
+    Identity,
+}
+
+impl Encoding {
+    pub fn header_value(self) -> Option<&'static str> {
+        match self {
+            Encoding::Brotli => Some("br"),
+            Encoding::Gzip => Some("gzip"),
+            Encoding::Identity => None,
+        }
+    }
+
+    fn etag_suffix(self) -> &'static str {
+        match self {
+            Encoding::Brotli => "-br",
+            Encoding::Gzip => "-gz",
+            Encoding::Identity => "",
+        }
+    }
+}
+
+impl Entry {
+    /// Picks the representation for an `Accept-Encoding` header value.
+    ///
+    /// The highest q-value wins; ties prefer brotli, then gzip, then identity.
+    /// A coding with `q=0` is never chosen. Identity is always available (we do
+    /// not answer 406), which RFC 9110 §12.5.3 permits.
+    pub fn negotiate(&self, accept_encoding: Option<&str>) -> (Encoding, &'static [u8]) {
+        let accept = accept_encoding.unwrap_or("");
+        let mut best = (Encoding::Identity, self.identity, 0.0_f32);
+        for (encoding, body) in [(Encoding::Gzip, self.gzip), (Encoding::Brotli, self.br)] {
+            let Some(body) = body else { continue };
+            let q = quality(accept, encoding.header_value().unwrap());
+            if q > 0.0 && q >= best.2 {
+                best = (encoding, body, q);
+            }
+        }
+        (best.0, best.1)
+    }
+
+    pub fn has_variants(&self) -> bool {
+        self.br.is_some() || self.gzip.is_some()
+    }
+
+    /// A strong validator per representation, so a cached brotli body is never
+    /// revalidated as if it were the gzip one.
+    pub fn etag(&self, encoding: Encoding) -> String {
+        format!("\"{}{}\"", self.hash, encoding.etag_suffix())
+    }
+
+    pub fn cache_control(&self) -> &'static str {
+        if self.path.starts_with(IMMUTABLE_PREFIX) {
+            "public, max-age=31536000, immutable"
+        } else {
+            // Stored, but checked against the ETag on every use: a new deploy is
+            // visible on the next page load, and an unchanged page costs a 304.
+            "public, max-age=0, must-revalidate"
+        }
+    }
+}
+
+/// The q-value the client gave `coding`, falling back to `*`, else 0.
+fn quality(accept: &str, coding: &str) -> f32 {
+    let mut wildcard = None;
+    for item in accept.split(',') {
+        let mut parts = item.split(';');
+        let name = parts.next().unwrap_or("").trim();
+        let q = parts
+            .find_map(|param| {
+                let (key, value) = param.split_once('=')?;
+                key.trim()
+                    .eq_ignore_ascii_case("q")
+                    .then(|| value.trim().parse::<f32>().ok())
+                    .flatten()
+            })
+            .unwrap_or(1.0);
+        if name.eq_ignore_ascii_case(coding) {
+            return q;
+        }
+        if name == "*" {
+            wildcard = Some(q);
+        }
+    }
+    wildcard.unwrap_or(0.0)
+}
+
+/// Weak comparison, as RFC 9110 §13.1.2 requires for `If-None-Match`.
+pub fn if_none_match_hits(header: &str, etag: &str) -> bool {
+    let opaque = |tag: &str| tag.trim().trim_start_matches("W/").to_string();
+    let ours = opaque(etag);
+    header
+        .split(',')
+        .any(|candidate| candidate.trim() == "*" || opaque(candidate) == ours)
+}
+
+pub trait SiteState {
+    fn site(&self) -> Site;
+}
+
+impl SiteState for State {
+    fn site(&self) -> Site {
+        self.site
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use super::*;
+
+    pub(crate) const FIXTURE: &[Entry] = &[
+        Entry {
+            path: "404.html",
+            content_type: "text/html; charset=utf-8",
+            hash: "404404",
+            identity: b"<h1>not here</h1>",
+            br: None,
+            gzip: None,
+        },
+        Entry {
+            path: "about.html",
+            content_type: "text/html; charset=utf-8",
+            hash: "aaaa",
+            identity: b"about",
+            br: None,
+            gzip: None,
+        },
+        Entry {
+            path: "assets/app-3f9a1c7e.css",
+            content_type: "text/css; charset=utf-8",
+            hash: "c55c55",
+            identity: b"body{margin:0}",
+            br: Some(b"BR"),
+            gzip: Some(b"GZ"),
+        },
+        Entry {
+            path: "docs/index.html",
+            content_type: "text/html; charset=utf-8",
+            hash: "d0c5",
+            identity: b"docs",
+            br: None,
+            gzip: None,
+        },
+        Entry {
+            path: "index.html",
+            content_type: "text/html; charset=utf-8",
+            hash: "1dex",
+            identity: b"<h1>home</h1>",
+            br: Some(b"BR-HOME"),
+            gzip: Some(b"GZ-HOME"),
+        },
+    ];
+
+    pub(crate) fn fixture() -> Site {
+        Site::new(FIXTURE, "fixture-digest")
+    }
+
+    fn path_of(resolution: Resolution) -> Option<&'static str> {
+        match resolution {
+            Resolution::Found(entry) => Some(entry.path),
+            _ => None,
+        }
+    }
+
+    #[test]
+    fn the_root_and_directories_serve_their_index_document() {
+        let site = fixture();
+        assert_eq!(path_of(site.resolve("/")), Some("index.html"));
+        assert_eq!(path_of(site.resolve("/docs/")), Some("docs/index.html"));
+    }
+
+    #[test]
+    fn a_page_is_found_with_or_without_its_html_extension() {
+        let site = fixture();
+        assert_eq!(path_of(site.resolve("/about")), Some("about.html"));
+        assert_eq!(path_of(site.resolve("/about.html")), Some("about.html"));
+    }
+
+    #[test]
+    fn a_directory_named_without_its_slash_redirects_to_the_slash_form() {
+        assert_eq!(fixture().resolve("/docs"), Resolution::AddSlash);
+    }
+
+    #[test]
+    fn dot_segments_never_escape_the_site_however_they_are_spelled() {
+        let site = fixture();
+        for path in [
+            "/../Cargo.toml",
+            "/assets/../index.html",
+            "/%2e%2e/%2e%2e/etc/passwd",
+            "/assets/%2E%2E%2Findex.html",
+            "/assets/..%5cindex.html",
+            "/./index.html",
+            "//index.html",
+            "/index.html%00",
+            "/%ff",
+            "relative",
+        ] {
+            assert_eq!(site.resolve(path), Resolution::NotFound, "{path}");
+        }
+    }
+
+    #[test]
+    fn a_percent_encoded_name_resolves_like_its_plain_spelling() {
+        assert_eq!(path_of(fixture().resolve("/%61bout")), Some("about.html"));
+    }
+
+    #[test]
+    fn brotli_wins_a_tie_with_gzip_and_a_higher_q_value_wins_outright() {
+        let entry = fixture().get("index.html").unwrap();
+        assert_eq!(
+            entry.negotiate(Some("gzip, deflate, br")).0,
+            Encoding::Brotli
+        );
+        assert_eq!(entry.negotiate(Some("br;q=0.5, gzip")).0, Encoding::Gzip);
+    }
+
+    #[test]
+    fn a_coding_refused_with_q_zero_is_never_chosen() {
+        let entry = fixture().get("index.html").unwrap();
+        assert_eq!(
+            entry.negotiate(Some("br;q=0, gzip;q=0")).0,
+            Encoding::Identity
+        );
+        assert_eq!(entry.negotiate(Some("*;q=0")).0, Encoding::Identity);
+    }
+
+    #[test]
+    fn a_wildcard_admits_the_compressed_variants() {
+        let entry = fixture().get("index.html").unwrap();
+        assert_eq!(entry.negotiate(Some("*")).0, Encoding::Brotli);
+    }
+
+    #[test]
+    fn no_accept_encoding_or_no_variant_means_identity() {
+        let site = fixture();
+        assert_eq!(
+            site.get("index.html").unwrap().negotiate(None).0,
+            Encoding::Identity
+        );
+        assert_eq!(
+            site.get("about.html").unwrap().negotiate(Some("br")).0,
+            Encoding::Identity
+        );
+    }
+
+    #[test]
+    fn hashed_assets_are_immutable_and_everything_else_revalidates() {
+        let site = fixture();
+        assert!(
+            site.get("assets/app-3f9a1c7e.css")
+                .unwrap()
+                .cache_control()
+                .contains("immutable")
+        );
+        let html = site.get("index.html").unwrap().cache_control();
+        assert!(html.contains("must-revalidate") && !html.contains("immutable"));
+    }
+
+    #[test]
+    fn if_none_match_compares_weakly_and_honours_the_wildcard() {
+        assert!(if_none_match_hits("\"abc\"", "\"abc\""));
+        assert!(if_none_match_hits("W/\"abc\"", "\"abc\""));
+        assert!(if_none_match_hits("\"x\", \"abc\"", "\"abc\""));
+        assert!(if_none_match_hits("*", "\"abc\""));
+        assert!(!if_none_match_hits("\"abc-br\"", "\"abc\""));
+    }
+
+    #[test]
+    fn each_representation_has_its_own_validator() {
+        let entry = fixture().get("index.html").unwrap();
+        let tags = [Encoding::Brotli, Encoding::Gzip, Encoding::Identity].map(|e| entry.etag(e));
+        assert_ne!(tags[0], tags[1]);
+        assert_ne!(tags[1], tags[2]);
+    }
+
+    /// The site must work under the CSP in `api.rs`, which forbids inline
+    /// script, inline style and event-handler attributes. Catch that here, when
+    /// the designed site is dropped in, rather than in a browser console.
+    #[test]
+    fn the_embedded_html_needs_nothing_the_csp_forbids() {
+        for entry in Site::embedded().entries() {
+            if !entry.content_type.starts_with("text/html") {
+                continue;
+            }
+            let html = String::from_utf8_lossy(entry.identity).to_ascii_lowercase();
+            let path = entry.path;
+            assert!(
+                !html.contains("<style"),
+                "{path}: inline <style> is blocked by style-src 'self'"
+            );
+            assert!(
+                !html.contains(" style="),
+                "{path}: style= attributes are blocked by style-src 'self'"
+            );
+            for tag in html.split("<script").skip(1) {
+                let open = tag.split('>').next().unwrap_or("");
+                let data_only = open.contains("type=\"application/json\"")
+                    || open.contains("type=\"application/ld+json\"");
+                assert!(
+                    open.contains("src=") || data_only,
+                    "{path}: inline <script> is blocked by script-src 'self'"
+                );
+            }
+            assert!(
+                !has_event_handler(&html),
+                "{path}: on*= event handler attributes are blocked by script-src 'self'"
+            );
+        }
+    }
+
+    /// True when `html` contains an attribute like ` onclick=`.
+    fn has_event_handler(html: &str) -> bool {
+        html.match_indices(|c: char| c.is_ascii_whitespace())
+            .any(|(at, _)| {
+                let rest = &html[at + 1..];
+                let Some(name) = rest.strip_prefix("on") else {
+                    return false;
+                };
+                let letters = name.bytes().take_while(u8::is_ascii_lowercase).count();
+                letters > 0 && name[letters..].trim_start().starts_with('=')
+            })
+    }
+
+    #[test]
+    fn the_event_handler_check_finds_handlers_and_ignores_prose() {
+        assert!(has_event_handler("<a onclick=\"x()\">"));
+        assert!(has_event_handler("<body\nonload = 'x'>"));
+        assert!(!has_event_handler("<p>built on grund</p>"));
+    }
+
+    #[test]
+    fn the_embedded_site_has_its_required_documents() {
+        let site = Site::embedded();
+        assert!(site.get("index.html").is_some());
+        assert!(site.not_found_document().is_some());
+        assert!(
+            site.entries()
+                .windows(2)
+                .all(|pair| pair[0].path < pair[1].path),
+            "table must be sorted"
+        );
+    }
+}
