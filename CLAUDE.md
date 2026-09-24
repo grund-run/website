@@ -74,13 +74,13 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   - Promoted by hand, as Kasper cleared:
     `forest release release <slug> --environment prod`.
   - There is no prod trigger; each prod release is a deliberate promotion.
-  - Forest's Flux webhook for clank-prod fails (non-fatal).
-    `flux reconcile source git flux-system` makes it apply at once.
-  - Reconcile only **after** `forest release show <slug>` reports
-    `[prod] ... [SUCCEEDED]`. With `--no-wait`, a reconcile can run before
-    forest has committed the release: Flux applies the previous revision,
-    `rollout status` reports the old deployment as healthy, and prod stays
-    on the old commit (happened 2026-09-24). Always confirm with the
+  - Forest's Flux webhook works since 2026-09-24: Flux applies about 2 s
+    after forest pushes. If a release log says "reconciliation webhook
+    failed", reconcile only **after** `forest release show <slug>` reports
+    `[prod] ... [SUCCEEDED]`. A reconcile that runs before forest has
+    committed the release applies the previous revision, `rollout status`
+    reports the old deployment as healthy, and prod stays on the old commit
+    (happened 2026-09-24, with `--no-wait`). Always confirm with the
     `revision` from https://grund.sh/health/ready.
   - www.grund.sh, grund.run and www.grund.run are served from the prod
     Ingress through kubernetes-app 0.1.13's `additional_hosts`, on the same
@@ -88,9 +88,10 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
     forest-components' CI publishes
     each version to both forest servers since 2026-09-24 (it used to publish
     only to forest.i.kjuulh.io, which releases do not read).
-  - Never `forest publish` from this machine: forest 0.3.13 sends it to
-    https://api.forest.understory.sh whatever `--context` or
-    `--forest-server` says (seen in a `-vv --dry-run`).
+  - Components are published by forest-components' CI, not by hand. In
+    forest 0.3.13 the "Publishing … to X" line names the stored active
+    context, but the upload honours `--context` (corrected 2026-09-24; fixed
+    upstream in understory-io/forest#301).
 - Prove what is deployed: `curl -s https://dev.grund.sh/health/ready`. The
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").
