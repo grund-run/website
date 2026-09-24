@@ -139,3 +139,18 @@ must meet, and what is deliberately not done. How to run it is in
   has no route or certificate in the cluster. The server's 308 to the apex is
   configured but unreachable until the component supports additional hosts.
 
+- **Verified 2026-09-24 from the public internet against https://grund.sh**
+  (prod, forest release `fluently-lithe-dugong`), revision
+  `e87ba36d64a374f402fa37d7a78232efe22be7aa`:
+  - all 6 sampled requests answered from that revision;
+  - one Let's Encrypt certificate covers grund.sh, www.grund.sh, grund.run
+    and www.grund.run, valid to 2026-12-23;
+  - accepttests 16/16 with `GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=grund.run`;
+  - `https://{www.grund.sh,grund.run,www.grund.run}/pricing?from=x` each
+    answer 308 to `https://grund.sh/pricing?from=x`;
+  - `http://grund.sh/` answers 301 to https;
+  - `curl -fsSL grund.sh/install | sh -s -- --domain app.example.com`
+    printed the notice, exited 1 and wrote nothing.
+- Verified the same day against https://dev.grund.sh (revision `e87ba36`):
+  its certificate covers dev.grund.sh and dev.grund.run, and the accepttests
+  passed 16/16 with dev.grund.run as the redirect host.
