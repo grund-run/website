@@ -132,7 +132,10 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   signup backend.
 - `/pricing` (`site/pricing.html`) shows **planned** pricing, labelled as
   such in its first line. The model is Kasper's (2026-09-24):
-  - Homelab: first machine free, then €3 per machine per month;
+  - Self-hosted: open source, free, every part including the dashboard (grund
+    is an open-source-first company; the site says so on the home page and on
+    pricing, without naming a licence until one is chosen);
+  - Homelab: first hosted machine free, then €3 per machine per month;
   - Pro: €10 per machine;
   - Business: €49 per month plus €10 per machine;
   - **grund machines** (rented through grund, priced by size: €29 / €45 /

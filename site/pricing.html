@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pricing · grund</title>
-<meta name="description" content="grund's planned pricing: your first machine is free, then €3 a machine at home, €10 for businesses, or rent machines from us with no license fee. In development.">
+<meta name="description" content="grund's planned pricing: open source and free to self-host, first hosted machine free, then €3 a machine at home or €10 for teams, or rent machines from us with no license fee. In development.">
 <meta name="theme-color" content="#141c18">
 <meta property="og:title" content="Pricing · grund">
 <meta property="og:description" content="Your first machine is free. €3 a machine at home, €10 for businesses.">
@@ -42,14 +42,25 @@
   <section class="page-hero">
     <div class="wrap">
       <p class="pill"><span class="dot"></span> Planned pricing. grund is not available yet.</p>
-      <h1>Your first machine is free. <span class="dim">The rest stays cheap.</span></h1>
-      <p class="lede">Running grund on your own machines should be fair: a few euros a month, like any tool you'd install at home. Businesses pay for the extras, and rent machines from us when they'd rather not own any. And you can always run all of it self-hosted.</p>
+      <h1>Open source first. <span class="dim">Hosted when you want it.</span></h1>
+      <p class="lede">grund is open source first: you can always run all of it yourself, for free. When you'd rather we host the dashboard and handle the updates, it's a few euros a machine. Businesses pay for the extras, and rent machines from us when they'd rather not own any.</p>
     </div>
   </section>
 
   <section class="plans-section">
     <div class="wrap">
-      <ul class="plans three">
+      <ul class="plans">
+        <li class="plan">
+          <h2>Self-hosted</h2>
+          <p class="plan-for">Open source. Run every part yourself.</p>
+          <p class="price"><strong>Free</strong><span>open source, on your own machines</span></p>
+          <ul class="plan-list">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>All of grund, dashboard included</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Any number of machines and apps</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>No hosted services from us</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Community support</li>
+          </ul>
+        </li>
         <li class="plan">
           <h2>Homelab</h2>
           <p class="plan-for">For the closet that runs the house.</p>
@@ -94,7 +105,7 @@
     <div class="wrap">
       <div class="self-hosted">
         <svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>
-        <p><strong>Rather run everything yourself?</strong> You always can. All of grund, dashboard included, runs self-hosted on your own machines, without any of our hosted services.</p>
+        <p><strong>Open source first.</strong> Every part of grund, dashboard included, runs self-hosted on your own machines. The paid plans are our hosted services on top, never a requirement.</p>
       </div>
     </div>
   </section>
@@ -144,23 +155,23 @@
       <div class="table-wrap">
         <table class="compare">
           <thead>
-            <tr><th scope="col"><span class="sr-only">Feature</span></th><th scope="col">Homelab</th><th scope="col">Pro</th><th scope="col">Business</th></tr>
+            <tr><th scope="col"><span class="sr-only">Feature</span></th><th scope="col">Self-hosted</th><th scope="col">Homelab</th><th scope="col">Pro</th><th scope="col">Business</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row">Your own machines</th><td>1 free, then €3 each</td><td>€10 each</td><td>€10 each</td></tr>
-            <tr><th scope="row">grund machines</th><td>From €29, no license</td><td>From €29, no license</td><td>From €29, no license</td></tr>
-            <tr><th scope="row">Deploy any app</th><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
-            <tr><th scope="row">Domains and HTTPS</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Releases with one-click undo</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Data backups</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Logs, metrics and secrets</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Dashboard and phone alerts</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Automatic grund updates</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Commercial use</th><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Team members</th><td>Household</td><td>Unlimited</td><td>Unlimited</td></tr>
-            <tr><th scope="row">Single sign-on</th><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Audit log</th><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
-            <tr><th scope="row">Support</th><td>Community</td><td>Email</td><td>Priority</td></tr>
+            <tr><th scope="row">Your own machines</th><td>Free, any number</td><td>1 free, then €3 each</td><td>€10 each</td><td>€10 each</td></tr>
+            <tr><th scope="row">grund machines</th><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td>From €29, no license</td><td>From €29, no license</td><td>From €29, no license</td></tr>
+            <tr><th scope="row">Deploy any app</th><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+            <tr><th scope="row">Domains and HTTPS</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Releases with one-click undo</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Data backups</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Logs, metrics and secrets</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Dashboard and phone alerts</th><td>Run it yourself</td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Automatic grund updates</th><td>Update yourself</td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Commercial use</th><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Team members</th><td>Unlimited</td><td>Household</td><td>Unlimited</td><td>Unlimited</td></tr>
+            <tr><th scope="row">Single sign-on</th><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Audit log</th><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon no" aria-label="Not included"><use href="#i-minus"/></svg></td><td><svg class="icon yes" aria-label="Included"><use href="#i-check"/></svg></td></tr>
+            <tr><th scope="row">Support</th><td>Community</td><td>Community</td><td>Email</td><td>Priority</td></tr>
           </tbody>
         </table>
       </div>
@@ -174,8 +185,8 @@
       </div>
       <dl class="faq">
         <div><dt>What counts as a machine?</dt><dd>Any computer grund runs your apps on: a mini PC, a server you own, or one you rent. The laptop you deploy from doesn't count.</dd></div>
-        <div><dt>Can I run all of it myself?</dt><dd>Yes, always. Every part of grund, including the dashboard, can run self-hosted on your own machines. Our hosted services are a convenience, never a requirement.</dd></div>
-        <div><dt>Is the free machine a trial?</dt><dd>No. Your first machine on Homelab is free for as long as you use it, with every feature Homelab has.</dd></div>
+        <div><dt>Can I run all of it myself?</dt><dd>Yes, always. grund is open source first: every part, including the dashboard, runs self-hosted on your own machines. Our hosted services are a convenience, never a requirement.</dd></div>
+        <div><dt>Is the free machine a trial?</dt><dd>No. Self-hosted is free and open source, and your first machine on Homelab is free for as long as you use it.</dd></div>
         <div><dt>Why is there no license on grund machines?</dt><dd>Because the rental price already covers it. A grund machine costs about what the same server would cost you elsewhere plus a Pro license.</dd></div>
         <div><dt>Do you charge for traffic, apps or storage?</dt><dd>No. Only machines are priced. Your hardware or provider covers the rest, and grund machines include it.</dd></div>
         <div><dt>What happens to my apps if I stop paying?</dt><dd>On your own machines they keep running, and you drop back to the free machine. A grund machine is a rental, so it ends with your plan; your data can be exported first.</dd></div>
