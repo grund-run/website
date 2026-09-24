@@ -122,6 +122,9 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 - Tests: `insights::tests` (what is sent) and
   `tests/accepttest/insights.rs` (a stub receiver; pages keep serving with
   insights down).
+- Verified 2026-09-24 on dev (website 3aa0e39): marked requests to
+  https://dev.grund.sh arrived in dev insights as page views, and a
+  stylesheet request did not. Prod reports nothing (unset).
 
 ## Editing the site
 
