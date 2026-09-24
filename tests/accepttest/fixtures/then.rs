@@ -20,6 +20,15 @@ impl Then {
         Ok(self)
     }
 
+    pub fn status_in(&self, allowed: &[u16]) -> anyhow::Result<&Self> {
+        let status = self.last()?.status;
+        ensure!(
+            allowed.contains(&status),
+            "status: got {status}, wanted one of {allowed:?}"
+        );
+        Ok(self)
+    }
+
     pub fn header(&self, name: &str, expected: &str) -> anyhow::Result<&Self> {
         let response = self.last()?;
         let value = response.header(name);

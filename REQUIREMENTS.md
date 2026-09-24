@@ -116,6 +116,13 @@ must meet, and what is deliberately not done. How to run it is in
   `git.kjuulh.io/grund/website:main-2c3562dadf25c7a4ca6bdbacb5b2c34d13f3e49b`,
   through `kubectl port-forward`): `/health/ready` reported `revision`
   `2c3562dadf25c7a4ca6bdbacb5b2c34d13f3e49b` and the same `site_digest` as the
-  local build, and `EXPECT_NOINDEX=1 ci/assert-http.sh` passed 59/59. **Not
-  established:** the public origin https://dev.grund.run. It has no DNS
-  record, gateway route or certificate yet.
+  local build, and `EXPECT_NOINDEX=1 ci/assert-http.sh` passed 59/59.
+- **Verified 2026-09-24 from the public internet against
+  https://dev.grund.run**, revision `35654efbe5e97abe72f9ac04664746177f308de3`:
+  - Let's Encrypt certificate for `CN=dev.grund.run`, valid to 2026-12-23;
+  - `http://` answers 301 to `https://`;
+  - the accepttests passed 16/16 with `GRUND_WEBSITE_ACCEPT_NOINDEX=true`.
+
+  Through the real edge, Traefik refuses encoded `/` and `\` in a path with
+  400 before the request reaches the server. The traversal test accepts that
+  refusal as well as the server's own 404.

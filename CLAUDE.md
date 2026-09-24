@@ -58,9 +58,14 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 ## Live
 
 - dev: https://dev.grund.run, namespace `dev` on clank-dev
-  (`~/.kube/clank-dev.yaml`)
+  (`~/.kube/clank-dev.yaml`). Public since 2026-09-24:
+  - Cloudflare DNS from grund/terraform;
+  - ratchet SNI route from kjuulh/clank-homelab;
+  - cert-manager DNS-01 through the grund.run solver in clank-homelab-flux.
 - prod: https://grund.run, namespace `prod` on clank-prod
-  (`~/.kube/clank-prod.yaml`)
+  (`~/.kube/clank-prod.yaml`). DNS, gateway route and certificate solver are
+  in place. Not promoted yet (Kasper's call). www.grund.run still needs the
+  kubernetes-app additional-hosts change first.
 - Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").

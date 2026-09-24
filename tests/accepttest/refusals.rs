@@ -14,7 +14,11 @@ async fn an_unknown_path_gets_the_404_document_and_is_not_cached_as_a_page() -> 
 }
 
 /// Sent byte for byte, unnormalised: nothing outside the embedded site is
-/// reachable however the path is spelled.
+/// reachable however the path is spelled. The server answers 404 (pinned by
+/// the unit tests in src/site.rs). Through a real edge, Traefik refuses
+/// encoded `/` and `\` itself with 400 before the request arrives, which is
+/// stricter, not weaker, so either refusal passes here. What must never
+/// happen is a 2xx or a redirect.
 #[tokio::test]
 async fn traversal_attempts_are_ordinary_404s() -> anyhow::Result<()> {
     let (_given, when, then) = testcase().await?;
@@ -28,7 +32,8 @@ async fn traversal_attempts_are_ordinary_404s() -> anyhow::Result<()> {
         "//etc/passwd",
     ] {
         when.requesting("GET", probe).await?;
-        then.status(404).map_err(|error| error.context(probe))?;
+        then.status_in(&[400, 404])
+            .map_err(|error| error.context(probe))?;
     }
     Ok(())
 }
