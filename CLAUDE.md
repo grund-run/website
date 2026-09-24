@@ -125,7 +125,9 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 - Verified 2026-09-24 on dev (website 3aa0e39): marked requests to
   https://dev.grund.sh arrived in dev insights as page views, and a
   stylesheet request did not. Prod reports too since Kasper turned it on
-  (2026-09-24).
+  (2026-09-24): promoted as closely-privileged-caterpillar (eb1d4d8, six
+  `/health/ready` samples across both replicas); three marked requests to
+  https://grund.sh arrived in prod insights.
 
 ## Editing the site
 
