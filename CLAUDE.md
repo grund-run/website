@@ -166,6 +166,12 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   an Estimate at provider cost plus about €10; the cost basis and what is
   not established are in `design/pricing-research.md`. Price by the machine,
   never by traffic or app count.
+- App addresses and custom domains are a planned feature. The design is
+  `design/app-domains.md` (its own apps domain on the Public Suffix List,
+  a relay for homelabs behind NAT, verified custom domains, grund-run
+  zones, and the self-hosted equivalent with your own DNS provider). On the
+  site it is "An address for every app", in plain words: no CNAME or zone
+  talk.
 - `/licenses` (`site/licenses.html`) holds the copyright notices and
   licenses for third-party material (the OFL fonts), with full texts under
   `site/licenses/`. Nowhere else on the site names them; the footer has one
