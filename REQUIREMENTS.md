@@ -126,3 +126,16 @@ must meet, and what is deliberately not done. How to run it is in
   Through the real edge, Traefik refuses encoded `/` and `\` in a path with
   400 before the request reaches the server. The traversal test accepts that
   refusal as well as the server's own 404.
+- **Verified 2026-09-24 from the public internet against https://grund.run**
+  (prod, 2 replicas on clank-prod, forest release `manually-cleansing-ray`),
+  revision `3ea09a6bddbf08e95084e07cca32118f4e04482e`:
+  - Let's Encrypt certificate for `CN=grund.run`, valid to 2026-12-23;
+  - `http://` answers 301 to `https://`;
+  - no `X-Robots-Tag`, so the site is indexable, as prod should be;
+  - the accepttests passed 16/16.
+
+  **Not working yet: https://www.grund.run** serves Traefik's default
+  certificate. kubernetes-app 0.1.12 gives the prod Ingress one host, so www
+  has no route or certificate in the cluster. The server's 308 to the apex is
+  configured but unreachable until the component supports additional hosts.
+

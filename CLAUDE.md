@@ -63,9 +63,14 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   - ratchet SNI route from kjuulh/clank-homelab;
   - cert-manager DNS-01 through the grund.run solver in clank-homelab-flux.
 - prod: https://grund.run, namespace `prod` on clank-prod
-  (`~/.kube/clank-prod.yaml`). DNS, gateway route and certificate solver are
-  in place. Not promoted yet (Kasper's call). www.grund.run still needs the
-  kubernetes-app additional-hosts change first.
+  (`~/.kube/clank-prod.yaml`), 2 replicas. Live since 2026-09-24.
+  - Promoted by hand, as Kasper cleared:
+    `forest release release <slug> --environment prod`.
+  - There is no prod trigger; each prod release is a deliberate promotion.
+  - Forest's Flux webhook for clank-prod fails (non-fatal).
+    `flux reconcile source git flux-system` makes it apply at once.
+  - **www.grund.run is broken** (Traefik default certificate) until
+    kubernetes-app supports additional hosts.
 - Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").
