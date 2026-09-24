@@ -26,6 +26,14 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 ./check.sh          # needs docker; builds in rust:1.98-alpine exactly as CI does
 ```
 
+- Behaviour over the wire goes in `tests/accepttest/` as a given/when/then
+  flow (the forest-server accepttest shape). Add a step to
+  `fixtures/{given,when,then}.rs` when a flow needs one. Do not add shell
+  assertion scripts.
+- Accepttests must assert behaviour, not copy, so they survive the designed
+  site dropping in (e.g. find the asset the home page links, never a
+  hard-coded name).
+
 ## Deploy
 
 - Push to main. CI publishes `git.kjuulh.io/grund/website:main-<sha>`, and
@@ -54,7 +62,8 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 - prod: https://grund.run, namespace `prod` on clank-prod
   (`~/.kube/clank-prod.yaml`)
 - Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
-  `revision` must equal the commit. Then run `ci/assert-http.sh`.
+  `revision` must equal the commit. Then run the accepttests against it
+  (README.md "Verify").
 
 ## Gotchas
 

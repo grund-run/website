@@ -1,7 +1,7 @@
-# Fast gates for every push and pull request: formatting, lints as errors, and
-# the unit tests. The release binary, its HTTP contract and the image live in
-# images.yaml, because the binary that passes the contract must be the one that
-# is packaged, and Woodpecker workflows do not share a workspace.
+# Fast gates for every push and pull request: formatting, lints as errors, the
+# unit tests, and the accepttests against a binary cargo spawns. images.yaml
+# runs the accepttests again against the release binary it packages, because
+# that is the artifact that ships and Woodpecker workflows share no workspace.
 
 when:
   - event: push

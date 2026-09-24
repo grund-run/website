@@ -96,8 +96,12 @@ must meet, and what is deliberately not done. How to run it is in
 
 ## Verification
 
-- `cargo test --locked`: 41 tests.
-- `ci/assert-http.sh <base-url> [redirect-host] [canonical-origin]`: 62 checks.
+- `cargo test --locked`: 41 unit tests, and 16 accepttests
+  (`tests/accepttest/`) against a spawned binary. The accepttests take
+  `GRUND_WEBSITE_ACCEPT_URL` to run against the image or a live origin instead.
+- The two records below were made with `ci/assert-http.sh` (62 checks), the
+  shell contract that the accepttests replaced on the same day with the same
+  coverage.
 - Verified 2026-09-24 against the release binary (`cargo build --release`,
   glibc host) and, via `./check.sh`, against the static musl binary from
   `rust:1.98-alpine` in a read-only scratch container. 62/62 both times.

@@ -28,6 +28,14 @@ sha2 = "0.11"
 
 [dev-dependencies]
 http-body-util = "0.1"
+# The accepttests speak raw HTTP/1.1 so that what they assert is what went over
+# the wire: traversal probes are sent unnormalised, and a HEAD body would be
+# seen. TLS is for running them against a live https origin. ring, not the
+# aws-lc-rs default, because aws-lc-rs needs cmake to build on alpine.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "time"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
+webpki-roots = "1"
 
 [profile.release]
 lto = "thin"

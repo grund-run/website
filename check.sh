@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Verify the site exactly as it ships: the static musl binary built in the CI
 # image, packaged by Dockerfile.prebuilt into a read-only scratch container,
-# asserted with the same ci/assert-http.sh that CI and a live check use.
+# asserted with the same accepttests (tests/accepttest) CI runs.
+#
+# A script because it is docker orchestration; every assertion lives in the
+# Rust accepttests.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -38,7 +41,8 @@ echo "runtime (read-only, as deployed)"
 cleanup
 docker run -d --name "$name" --read-only -p "127.0.0.1:$port:8080" \
   -e GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.run "$img" >/dev/null
-if ! ./ci/assert-http.sh "http://127.0.0.1:$port" www.grund.run https://grund.run; then
+if ! GRUND_WEBSITE_ACCEPT_URL="http://127.0.0.1:$port" GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.run \
+  cargo test --locked --test tests; then
   docker logs "$name"
   exit 1
 fi
