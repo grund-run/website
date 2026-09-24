@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>grund · From zero to production, on your own premises</title>
-<meta name="description" content="grund takes any app, from a homelab service to a SaaS, from a bare machine to deployed, backed up and recoverable, on hardware you own. Start on one box, grow to a fleet. In development.">
+<meta name="description" content="Bring a machine, deploy your app, and it's live for your customers. grund runs any app on hardware you own, from a homelab to a SaaS, with no infrastructure to learn. In development.">
 <meta name="theme-color" content="#141c18">
 <meta property="og:title" content="grund · From zero to production, on your own premises">
-<meta property="og:description" content="Any app, from a homelab service to a SaaS: deployed, backed up and recoverable on hardware you own. Start on one box, grow to a fleet.">
+<meta property="og:description" content="Bring a machine, deploy your app, and it's live for your customers. Any app, on hardware you own.">
 <meta property="og:url" content="https://grund.run/">
 <meta property="og:type" content="website">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -18,18 +18,12 @@
 <svg class="sprite" aria-hidden="true">
   <symbol id="mark" viewBox="7 6 38 29"><path fill="currentColor" d="M20 20.5v-9A4.5 4.5 0 0 1 24.5 7h18a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-10v3.5z"/><rect fill="currentColor" x="8" y="23" width="36" height="11" rx="2"/></symbol>
   <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></symbol>
-  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
   <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="m7.5 12.5 3 3 6-6.5" stroke="#0e1710" stroke-width="2.5"/></symbol>
-  <symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M12 7v6M12 16.5v.5" stroke="#0e1710" stroke-width="2.5"/></symbol>
   <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
   <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
   <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v5h5"/></symbol>
   <symbol id="i-door" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
-  <symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8v8"/><path d="M18 10.5c0 4-6 3-11 6"/></symbol>
-  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
-  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></symbol>
-  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 6.5a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
   <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
@@ -39,6 +33,9 @@
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
   <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7z"/><path d="M3.5 7 12 11.5 20.5 7"/><path d="M12 11.5v10"/></symbol>
   <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/><path d="m14 4-4 16"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 20V13M12 20V8M19 20V4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4.5"/><path d="m11.2 11.8 8.3-8.3"/><path d="m16 7 2.5 2.5"/><path d="m18.5 4.5 2 2"/></symbol>
 </svg>
 
 <a class="skip" href="#main">Skip to content</a>
@@ -47,9 +44,9 @@
   <div class="wrap">
     <a class="brand" href="/" aria-label="grund, home"><svg class="mark" aria-hidden="true"><use href="#mark"/></svg><span>grund</span></a>
     <nav class="nav" aria-label="Primary">
-      <a href="#journey">The journey</a>
+      <a href="#journey">How it works</a>
       <a href="#examples">Examples</a>
-      <a href="#evidence">Evidence</a>
+      <a href="#features">Features</a>
       <a href="#ownership">Ownership</a>
       <a class="nav-gh" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
     </nav>
@@ -63,10 +60,10 @@
     <div class="wrap hero-inner">
       <p class="pill"><span class="dot"></span> In development. Not yet available.</p>
       <h1>From zero to production, on your own&nbsp;premises.</h1>
-      <p class="lede">Whether it's the media server in your closet or the SaaS that pays your salary, grund takes any app from a bare machine to deployed, backed up and recoverable. Start on one box. Grow to a fleet without starting over.</p>
+      <p class="lede">Bring a machine, deploy your app, and it's live for your customers. No infrastructure to learn, no platform team to hire. grund handles the rest, from a homelab in the closet to a SaaS that pays the bills.</p>
       <div class="actions">
         <a class="button" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Follow the build</a>
-        <a class="button ghost" href="#journey">See the journey</a>
+        <a class="button ghost" href="#journey">How it works</a>
       </div>
     </div>
   </section>
@@ -74,64 +71,45 @@
   <section class="facts">
     <div class="wrap">
       <ul class="fact-grid">
-        <li><h3>Any app, any service.</h3><p>A container image or a Dockerfile: an open-source tool you self-host, or the product you are building.</p></li>
-        <li><h3>Starts on the machine you have.</h3><p>A mini PC, an old desktop, a rack in the basement or a rented dedicated server.</p></li>
-        <li><h3>Grows without a rewrite.</h3><p>Add machines when it matters. The apps you deployed on day one keep running, now highly available.</p></li>
-        <li><h3>Yours, end to end.</h3><p>Your hardware, your data, your git. A standard cluster that keeps running without us.</p></li>
+        <li><h3>Any app.</h3><p>A container image or a Dockerfile. Something you found on GitHub, or the product you are building.</p></li>
+        <li><h3>Your machines.</h3><p>A mini PC, an old desktop, a server in the basement, or one you rent.</p></li>
+        <li><h3>Live in minutes.</h3><p>An address, HTTPS and a running app. That's the whole job.</p></li>
+        <li><h3>Nothing to babysit.</h3><p>Simple, boring and efficient. It keeps running while you work on something else.</p></li>
       </ul>
     </div>
   </section>
 
   <section class="section centered" id="journey">
     <div class="wrap">
-      <h2>Zero to hero <span class="dim">on your premises.</span></h2>
-      <p class="section-lede">Every level builds on the last. Stop wherever you are happy: a homelab can live at level three for years. A SaaS keeps climbing.</p>
+      <h2>From zero to live <span class="dim">in three steps.</span></h2>
+      <p class="section-lede">Nothing to configure, nothing to learn. You deploy an application; grund makes it available to the people who use it.</p>
 
       <ol class="journey">
         <li class="level">
           <div class="level-copy">
-            <span class="num">0</span>
-            <h3>Start with the machine you have.</h3>
-            <p>No cloud account, no platform team. One box with an internet connection is enough to begin.</p>
+            <span class="num">1</span>
+            <h3>Bring a machine.</h3>
+            <p>Whatever you have. One box with an internet connection is enough to start.</p>
           </div>
           <div class="level-visual">
             <ul class="hw">
-              <li><svg class="icon" aria-hidden="true"><use href="#i-cpu"/></svg><div><strong>Mini PC in the closet</strong><span>4 cores · 16 GB · 1 TB SSD</span></div></li>
-              <li><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg><div><strong>Rack server in the basement</strong><span>16 cores · 64 GB · RAID</span></div></li>
-              <li><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><div><strong>Rented dedicated server</strong><span>Hetzner, OVH, or any provider</span></div></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-cpu"/></svg><div><strong>Mini PC in the closet</strong><span>the one you already own</span></div></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg><div><strong>Server in the basement</strong><span>or a rack at the office</span></div></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><div><strong>A rented server</strong><span>Hetzner, OVH, or anyone else</span></div></li>
             </ul>
           </div>
         </li>
 
         <li class="level">
           <div class="level-copy">
-            <span class="num">1</span>
-            <h3>Turn it into a platform in one command.</h3>
-            <p>grund installs a pinned, tested stack: a cluster, ingress with automatic TLS, metrics, and backups to storage you choose.</p>
+            <span class="num">2</span>
+            <h3>Install grund.</h3>
+            <p>One command turns the machine into a place your apps can live. Nothing else to set up.</p>
           </div>
           <div class="level-visual">
             <div class="shell">
               <p><span class="prompt">$</span> grund init --server nuc.home.lan</p>
-              <p class="ok-line">✓ cluster ready on nuc</p>
-              <p class="ok-line">✓ ingress and certificates</p>
-              <p class="ok-line">✓ metrics and alerts</p>
-              <p class="ok-line">✓ backups to s3://home-backups</p>
-            </div>
-          </div>
-        </li>
-
-        <li class="level">
-          <div class="level-copy">
-            <span class="num">2</span>
-            <h3>Deploy anything, with a real domain.</h3>
-            <p>Point grund at an image or a Dockerfile. It gets a hostname, a certificate and health checks, and restarts when it falls over.</p>
-          </div>
-          <div class="level-visual">
-            <div class="shell">
-              <p><span class="prompt">$</span> grund deploy ghcr.io/immich-app/immich-server \</p>
-              <p>&nbsp;&nbsp;&nbsp;&nbsp;--domain photos.home.example</p>
-              <p class="ok-line">✓ healthy in 24 s</p>
-              <p class="ok-line">✓ https://photos.home.example</p>
+              <p class="ok-line">✓ nuc is ready for apps</p>
             </div>
           </div>
         </li>
@@ -139,79 +117,50 @@
         <li class="level">
           <div class="level-copy">
             <span class="num">3</span>
-            <h3>Keep your data, and prove you can get it back.</h3>
-            <p>Databases stream their changes off-site. Every night grund restores them somewhere safe and checks the result, so a dead disk is an afternoon, not a disaster.</p>
-          </div>
-          <div class="level-visual">
-            <div class="panel mini">
-              <ul class="checks">
-                <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>immich-db restore drill</strong><span>Tonight 03:12 · 48,210 photos accounted for</span></div><em>passed</em></li>
-                <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Off-site backup</strong><span>Last change shipped 6 s ago</span></div><em>RPO 6 s</em></li>
-              </ul>
-            </div>
-          </div>
-        </li>
-
-        <li class="level">
-          <div class="level-copy">
-            <span class="num">4</span>
-            <h3>Add machines when it matters.</h3>
-            <p>Join two more servers and grund spreads your apps and replicas across them. Nothing is redeployed from scratch; one machine can now fail without taking you down.</p>
+            <h3>Deploy your app.</h3>
+            <p>Give it an image or a Dockerfile and an address. It's live, with HTTPS, and it restarts itself if it falls over.</p>
           </div>
           <div class="level-visual">
             <div class="shell">
-              <p><span class="prompt">$</span> grund add server srv-2 srv-3</p>
-              <p class="ok-line">✓ 3 servers in quorum</p>
-              <p class="ok-line">✓ replicas rebalanced</p>
-              <p class="ok-line">✓ can lose any 1 server</p>
-            </div>
-          </div>
-        </li>
-
-        <li class="level">
-          <div class="level-copy">
-            <span class="num">5</span>
-            <h3>Ship like a SaaS.</h3>
-            <p>Releases are promoted by digest through health gates. A bad one rolls back on its own before your customers notice, and every guarantee comes with evidence.</p>
-          </div>
-          <div class="level-visual">
-            <div class="panel mini">
-              <ol class="timeline">
-                <li class="is-fail"><svg class="st fail" aria-hidden="true"><use href="#i-fail"/></svg><div><strong>api: health check failed at 10%</strong><span>p95 latency 2.1 s, budget 400 ms</span></div><time>14:03:12</time></li>
-                <li class="is-ok"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Rolled back to the last good release</strong><span>9 s · nobody paged</span></div><time>14:03:21</time></li>
-              </ol>
+              <p><span class="prompt">$</span> grund deploy . --domain app.example.com</p>
+              <p class="ok-line">✓ live at https://app.example.com</p>
             </div>
           </div>
         </li>
       </ol>
-      <p class="note">Commands and output are illustrative. grund is in development and its interface may change.</p>
+
+      <div class="grow">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+        <p><strong>Outgrow one machine?</strong> Add another with <code>grund add server</code> and your apps spread across both. Nothing to redeploy, nothing to reconfigure.</p>
+      </div>
+      <p class="note">Commands are illustrative. grund is in development and its interface may change.</p>
     </div>
   </section>
 
   <section class="section centered" id="examples">
     <div class="wrap">
-      <h2>One platform, <span class="dim">whatever you run.</span></h2>
-      <p class="section-lede">The same path serves a family photo library and a product with paying customers. Two examples of where the journey leads.</p>
+      <h2>One way to deploy, <span class="dim">whatever you run.</span></h2>
+      <p class="section-lede">The same three steps put a family photo library and a product with paying customers online.</p>
 
       <div class="examples">
         <article class="example">
           <div class="example-head">
             <span class="kicker">Homelab</span>
             <h3>The closet that runs the house</h3>
-            <p>One mini PC, level 3.</p>
+            <p>One mini PC.</p>
           </div>
           <div class="panel apps">
-            <div class="panel-head"><span>Home</span><span class="muted"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>1 server</span></div>
+            <div class="panel-head"><span>Home</span><span class="muted"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>1 machine</span></div>
             <ul class="app-rows">
-              <li><svg class="icon c-orange" aria-hidden="true"><use href="#i-image"/></svg><div><strong>Immich</strong><span class="mono">photos.home.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Serving</span></li>
-              <li><svg class="icon c-violet" aria-hidden="true"><use href="#i-play"/></svg><div><strong>Jellyfin</strong><span class="mono">media.home.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Serving</span></li>
-              <li><svg class="icon c-blue" aria-hidden="true"><use href="#i-home"/></svg><div><strong>Home Assistant</strong><span class="mono">home.home.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Serving</span></li>
+              <li><svg class="icon c-orange" aria-hidden="true"><use href="#i-image"/></svg><div><strong>Immich</strong><span class="mono">photos.home.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Live</span></li>
+              <li><svg class="icon c-violet" aria-hidden="true"><use href="#i-play"/></svg><div><strong>Jellyfin</strong><span class="mono">media.home.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Live</span></li>
+              <li><svg class="icon c-blue" aria-hidden="true"><use href="#i-home"/></svg><div><strong>Home Assistant</strong><span class="mono">home.home.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Live</span></li>
             </ul>
           </div>
           <ul class="outcomes">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Photos backed up off-site and restore-tested nightly</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Every app on its own domain with a valid certificate</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Updates that roll back instead of breaking the house</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Every app on its own address, with HTTPS</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Updates you can undo in one click</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>The photos are backed up every night</li>
           </ul>
         </article>
 
@@ -219,20 +168,20 @@
           <div class="example-head">
             <span class="kicker">SaaS</span>
             <h3>The product that pays the bills</h3>
-            <p>Three dedicated servers, level 5.</p>
+            <p>Three rented servers.</p>
           </div>
           <div class="panel apps">
-            <div class="panel-head"><span>Nord Studio · Production</span><span class="muted"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>3 servers</span></div>
+            <div class="panel-head"><span>Nord Studio</span><span class="muted"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>3 machines</span></div>
             <ul class="app-rows">
-              <li><svg class="icon c-orange" aria-hidden="true"><use href="#i-box"/></svg><div><strong>Storefront</strong><span class="mono">shop.nord.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Serving</span></li>
-              <li><svg class="icon c-violet" aria-hidden="true"><use href="#i-code"/></svg><div><strong>Customer API</strong><span class="mono">api.nord.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Serving</span></li>
-              <li><svg class="icon c-blue" aria-hidden="true"><use href="#i-db"/></svg><div><strong>Postgres</strong><span class="mono">3 replicas · PITR 14 days</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Healthy</span></li>
+              <li><svg class="icon c-orange" aria-hidden="true"><use href="#i-box"/></svg><div><strong>Storefront</strong><span class="mono">shop.nord.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Live</span></li>
+              <li><svg class="icon c-violet" aria-hidden="true"><use href="#i-code"/></svg><div><strong>Customer API</strong><span class="mono">api.nord.example</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Live</span></li>
+              <li><svg class="icon c-blue" aria-hidden="true"><use href="#i-db"/></svg><div><strong>Database</strong><span class="mono">backed up nightly</span></div><span class="serving"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg>Live</span></li>
             </ul>
           </div>
           <ul class="outcomes">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Restore the database to any second in the last 14 days</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Lose any one server without an outage</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>A fraction of the cloud bill for the same workload</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Customers reach it on your domain, over HTTPS</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Stays up if one of the machines dies</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>A fraction of what the same app costs in the cloud</li>
           </ul>
         </article>
       </div>
@@ -240,91 +189,32 @@
     </div>
   </section>
 
-  <section class="section split" id="evidence">
-    <div class="wrap split-grid">
-      <div>
-        <h2>Every guarantee <span class="dim">comes with evidence.</span></h2>
-        <p class="section-lede">A backup nobody has restored is a hope. grund tests its own promises on a schedule and shows you what it measured, at every level of the journey.</p>
-        <dl class="labelled">
-          <div><dt>restore</dt><dd>Databases restored nightly into an isolated space and compared row for row.</dd></div>
-          <div><dt>failover</dt><dd>From three machines, an opt-in drill drains one and measures recovery.</dd></div>
-          <div><dt>backups</dt><dd>Changes streamed off-site, never only on the machine they protect.</dd></div>
-          <div><dt>alerts</dt><dd>Certificate expiry, backup age and disk space, sent to email or your phone.</dd></div>
-        </dl>
-      </div>
-      <figure class="visual" aria-label="Example: a grund evidence panel showing passing restore and failover drills.">
-        <div class="panel">
-          <div class="panel-head"><span>Evidence</span><span class="muted">Production</span></div>
-          <ul class="checks">
-            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Restore drill</strong><span>Tonight 03:12 · restored to 02:47:19 · 1.2 M rows match</span></div><em>RTO 3 m 40 s</em></li>
-            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Failover drill</strong><span>2 days ago · drained srv-2 · traffic back in 38 s</span></div><em>any 1 server</em></li>
-            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Off-site backup</strong><span>Last WAL segment shipped 4 s ago</span></div><em>RPO 4 s</em></li>
-            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Certificates</strong><span>6 domains valid · next renewal in 21 days</span></div><em>auto-renew</em></li>
-          </ul>
-          <div class="panel-foot"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>3 servers · can lose any 1</div>
-        </div>
-        <figcaption>Example evidence. grund is in development.</figcaption>
-      </figure>
+  <section class="section centered" id="features">
+    <div class="wrap">
+      <h2>Everything an app needs. <span class="dim">Nothing you have to run.</span></h2>
+      <p class="section-lede">The parts every deployment ends up needing are simply there. You never assemble them.</p>
+      <ul class="features">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><h3>Domains and HTTPS</h3><p>Pick an address. Certificates are issued and renewed for you.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg><h3>Releases</h3><p>Ship a new version. If it misbehaves, the previous one comes back.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-db"/></svg><h3>Data</h3><p>Databases and files, backed up every night and restored when you ask.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-bars"/></svg><h3>Logs and metrics</h3><p>See what your app is doing without wiring anything up.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg><h3>Secrets</h3><p>Keys and passwords stay out of your code, and out of our hands.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg><h3>More machines</h3><p>Add one when you need it. Your apps spread out on their own.</p></li>
+      </ul>
     </div>
   </section>
 
   <section class="section" id="ownership">
     <div class="wrap">
       <div class="section-head">
-        <h2>Your premises. Your git. <span class="dim">You can leave.</span></h2>
-        <p class="section-lede">grund automates a stack you could run yourself. Nothing about it depends on us staying around, or on your hardware staying where it is.</p>
+        <h2>Your machines. Your data. <span class="dim">You can leave.</span></h2>
+        <p class="section-lede">grund runs where you put it. Nothing about your apps depends on us staying around, or on your hardware staying where it is.</p>
       </div>
-      <div class="cards">
-        <article class="card">
-          <div class="card-visual">
-            <div class="term">
-              <p><span class="prompt">$</span> kubectl get nodes</p>
-              <p class="muted">NAME&nbsp;&nbsp;&nbsp;STATUS&nbsp;&nbsp;ROLES</p>
-              <p>srv-1&nbsp;&nbsp;Ready&nbsp;&nbsp;&nbsp;control-plane</p>
-              <p>srv-2&nbsp;&nbsp;Ready&nbsp;&nbsp;&nbsp;control-plane</p>
-              <p>srv-3&nbsp;&nbsp;Ready&nbsp;&nbsp;&nbsp;control-plane</p>
-            </div>
-          </div>
-          <h3>A standard cluster underneath</h3>
-          <p>k3s, Flux and CloudNativePG. No proprietary runtime you cannot inspect.</p>
-        </article>
-        <article class="card">
-          <div class="card-visual">
-            <ul class="tree">
-              <li><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>clusters/home</li>
-              <li class="in"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>immich.yaml</li>
-              <li class="in"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>jellyfin.yaml</li>
-              <li class="in"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>secrets.enc.yaml</li>
-            </ul>
-          </div>
-          <h3>Everything lives in your git</h3>
-          <p>Plain manifests and encrypted secrets in your repository, applied by Flux.</p>
-        </article>
-        <article class="card">
-          <div class="card-visual">
-            <div class="flow">
-              <span class="node">closet</span>
-              <span class="edge">same manifests</span>
-              <span class="node on">Hetzner</span>
-            </div>
-            <p class="flow-note">New servers, no rewrite</p>
-          </div>
-          <h3>Move without starting over</h3>
-          <p>From the closet to a rented rack, or back. Point grund at new machines and restore onto them.</p>
-        </article>
-        <article class="card">
-          <div class="card-visual">
-            <div class="flow">
-              <span class="node">grund</span>
-              <span class="edge">signed intent</span>
-              <span class="node on">agent</span>
-            </div>
-            <p class="flow-note">No SSH keys, no remote commands</p>
-          </div>
-          <h3>Our control plane cannot root you</h3>
-          <p>An agent on your machines pulls signed intents and verifies them. We never hold your keys.</p>
-        </article>
-      </div>
+      <ul class="features own">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><h3>On your premises</h3><p>Your apps and your customers' data never leave hardware you control.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-door"/></svg><h3>Move without starting over</h3><p>From the closet to a rented server, or back. Point grund at the new machines and carry on.</p></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><h3>No lock-in</h3><p>Built on open-source software you could run yourself. We never hold the keys to your machines.</p></li>
+      </ul>
     </div>
   </section>
 
@@ -337,23 +227,23 @@
         <div>
           <p class="list-title">Made for</p>
           <ul class="list">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Homelabbers</strong> who want their services to survive a dead disk and a busy month.</span></li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Founders and small teams</strong> whose product outgrew a platform bill.</span></li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Anyone self-hosting</strong> who wants Kubernetes' guarantees without running Kubernetes by hand.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Homelabbers</strong> who want their apps online without a weekend of setup.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Founders and small teams</strong> who want to ship the product, not run infrastructure.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Anyone self-hosting</strong> who wants it to just work.</span></li>
           </ul>
         </div>
         <div>
           <p class="list-title">Not what it promises</p>
           <ul class="list is-not">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>An SLA on your hardware.</strong> You own the machines; grund owns the automation.</span></li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>Multi-region.</strong> One site, done well, first.</span></li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>High availability on one box.</strong> A single machine is supported, and labelled as such.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>An SLA on your hardware.</strong> You own the machines; grund runs the apps on them.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>Multi-region.</strong> One place, done well.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>Staying up on a single machine.</strong> If the only machine dies, so do the apps on it. Add a second.</span></li>
           </ul>
         </div>
         <div class="honest">
           <p class="list-title">The cost, up front</p>
           <p>Start on hardware you already own, for nothing but electricity.</p>
-          <p>Real high availability needs three machines, a quorum. Rented from a provider like Hetzner that is roughly <strong>€290 a month</strong> before storage, often a fraction of the cloud bill it replaces.</p>
+          <p>When you want to rent, a few dedicated servers often cost a fraction of the cloud bill for the same app.</p>
         </div>
       </div>
     </div>

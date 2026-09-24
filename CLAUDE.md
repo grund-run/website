@@ -102,6 +102,62 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 ## Open items
 
+- The page tells one story: bring a machine, deploy your app, it's live for
+  your customers, for any app from a homelab to a SaaS. The tone is simple,
+  boring and efficient (Kasper's direction, 2026-09-24).
+- **No infrastructure lingo on the page.** No quorum, replicas, clusters,
+  k3s, Flux, Postgres internals, PITR/RPO/RTO, digests, health gates,
+  manifests, YAML, control plane or agents. Not even as negations ("no
+  YAML"). The user deploys an application and never has to care what is
+  underneath.
+- **Releases and backups are features, not the product.** They are two tiles
+  in the features grid ("Releases", "Data"), next to domains, logs, secrets
+  and more machines. Do not bring back an evidence or drills section.
+- Layout, in the boxes.dev mould:
+  - hero over the drawn strata, then four facts;
+  - three steps to live (machine, install, deploy) plus an "outgrow one
+    machine?" note;
+  - two examples (homelab, SaaS);
+  - features, ownership, who it's for and the cost.
+- Homelabs are in scope, which widens the audience beyond PLATFORM.md.
+- The CLI commands are invented and captioned as illustrative. Never show a
+  pasteable `curl … | sh`: grund.run serves HTML.
+- grund is labelled in development in the first line, and examples are
+  captioned as examples. No pricing (still an estimate). The call to action
+  is GitHub, because there is no signup backend.
+
+## Editing the site
+
+- The palette and type come from `design/reference/dashboard-overview.png`,
+  and the colour tokens are at the top of `site/styles.css`. Keep the page and
+  the product looking like one thing. The dashboard is a colour reference
+  only; it is not shown on the page.
+- Icons are one inline SVG sprite at the top of `index.html`, used with
+  `<use href="#id">`. The hero strata SVG is generated artwork, inlined in the
+  page.
+- Copy must not present planned guarantees as shipped. The evidence examples
+  are labelled as examples.
+- Look at it in a real browser with the real server, so the CSP applies:
+  `cargo run`, then headless Chrome with `--screenshot` at 1440 px and 390 px
+  wide. `google-chrome-stable` is on this machine.
+
+## Gotchas
+
+- **`build.rs` panics on purpose** when `site/` lacks `index.html` or
+  `404.html`, holds an unknown extension, or has a file name outside
+  `[A-Za-z0-9._~@+-]`. The message names the file. Fix the site, not the check.
+- **Anything under `site/assets/` is cached for a year.** Never put an unhashed
+  file there.
+- **`the_embedded_html_needs_nothing_the_csp_forbids` fails** when the site
+  has inline script or style. Move it to a file under `assets/`.
+- The revision in `/health/ready` comes from `CI_COMMIT_SHA` at build time.
+  Local builds say `unknown`. Set `GRUND_WEBSITE_REVISION` to override.
+- `check.sh` runs the in-container build as root and then chowns
+  `target/musl` back to you. If you interrupt it, `target/musl` may be left
+  owned by root.
+
+## Open items
+
 - The page tells one story: zero to production on your own premises, for any
   app, homelab or SaaS (Kasper's direction, 2026-09-24). The layout is in the
   boxes.dev mould.
