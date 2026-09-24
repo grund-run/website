@@ -75,14 +75,11 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
     `rollout status` reports the old deployment as healthy, and prod stays
     on the old commit (happened 2026-09-24). Always confirm with the
     `revision` from https://grund.run/health/ready.
-  - **www.grund.run is broken** (Traefik default certificate).
-    kubernetes-app 0.1.13 adds `additional_hosts`, but it is published only
-    to forest.i.kjuulh.io (forest-components' CI target). The server that
-    releases resolve components through, api.forest.kjuulh.io, has only up
-    to 0.1.12, and a rollout pinned to 0.1.13 fails with "failed to find
-    upstream component" (pipeline 18, 2026-09-24). Bump to 0.1.13 and set
-    `additional_hosts: ["www.grund.run"]` on prod once 0.1.13 is on
-    api.forest.kjuulh.io.
+  - www.grund.run is served from the prod Ingress through kubernetes-app
+    0.1.13's `additional_hosts`, on the same certificate as the apex, and the
+    server 308s it to https://grund.run. forest-components' CI publishes
+    each version to both forest servers since 2026-09-24 (it used to publish
+    only to forest.i.kjuulh.io, which releases do not read).
   - Never `forest publish` from this machine: forest 0.3.13 sends it to
     https://api.forest.understory.sh whatever `--context` or
     `--forest-server` says (seen in a `-vv --dry-run`).
