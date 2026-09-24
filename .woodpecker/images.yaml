@@ -1,0 +1,78 @@
+# Build the static binary, prove it against the HTTP contract, and package
+# exactly that binary. Runs only after ci.yaml passes.
+#
+# Required Woodpecker secret (push to main only; pull requests use none):
+#   registry_token: a git.kjuulh.io token for user kjuulh with package write
+#   access to the grund organisation. Currently the instance-wide secret.
+#
+# One immutable tag, main-${CI_COMMIT_SHA}. kjuulh/woodpecker-forest computes
+# exactly that tag from the commit and pins the release to it, so a rollout
+# cannot find its image if this tag stops being published. There is no latest
+# or main tag: a moving tag gives a rollback nothing to roll back to.
+
+when:
+  - event: push
+    branch: main
+  - event: pull_request
+  - event: manual
+
+depends_on:
+  - ci
+
+labels:
+  platform: linux/amd64
+
+steps:
+  build-and-contract:
+    # rust:*-alpine targets musl natively: the release binary is static, which
+    # is what lets it run on scratch.
+    image: rust:1.98-alpine
+    environment:
+      CARGO_TERM_COLOR: always
+    commands:
+      - apk add --no-cache musl-dev binutils curl
+      # build.rs compiles CI_COMMIT_SHA into /health/ready as "revision".
+      - cargo build --locked --release
+      - if readelf -d target/release/grund-website | grep -q NEEDED; then echo "grund-website is dynamically linked; scratch cannot run it"; exit 1; fi
+      # Assert against the real binary, not a mock of it. The contract is the
+      # file check.sh and a live verification also run.
+      - GRUND_WEBSITE_LISTEN=127.0.0.1:8080 GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.run ./target/release/grund-website > server.log 2>&1 &
+      - ./ci/assert-http.sh http://127.0.0.1:8080 www.grund.run https://grund.run || { echo "--- server log"; cat server.log; exit 1; }
+      # Package exactly the binary that passed; the image steps compile nothing.
+      - mkdir -p .image && cp target/release/grund-website .image/grund-website
+
+  # A broken Dockerfile fails the pull request that broke it, not the next
+  # push to main. Builds, never pushes, and needs no secret.
+  image-dry-run:
+    image: woodpeckerci/plugin-docker-buildx:5
+    depends_on: [build-and-contract]
+    when:
+      - event: pull_request
+    settings:
+      dockerfile: Dockerfile.prebuilt
+      context: .image
+      repo: git.kjuulh.io/grund/website
+      platforms: linux/amd64
+      dry_run: true
+      auto_tag: false
+      tags: ci-${CI_COMMIT_SHA_SHORT}
+
+  image-publish:
+    image: woodpeckerci/plugin-docker-buildx:5
+    depends_on: [build-and-contract]
+    when:
+      - event: push
+        branch: main
+      - event: manual
+    settings:
+      registry: git.kjuulh.io
+      repo: git.kjuulh.io/grund/website
+      dockerfile: Dockerfile.prebuilt
+      context: .image
+      username: kjuulh
+      password:
+        from_secret: registry_token
+      platforms: linux/amd64
+      auto_tag: false
+      tags:
+        - main-${CI_COMMIT_SHA}

@@ -26,6 +26,32 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 ./check.sh          # needs docker; builds in rust:1.98-alpine exactly as CI does
 ```
 
+## Deploy
+
+- Push to main. CI publishes `git.kjuulh.io/grund/website:main-<sha>`, and
+  `rollout.yaml` stages a forest release (project `kjuulh/grund-website`).
+  Forest triggers roll it to dev.
+- **Never promote to prod from here** (`forest release release/approve`
+  against prod). That is Kasper's call.
+- `rollout.yaml` is generated. After changing the `woodpecker-forest` block in
+  `forest.cue`, run `forest run install` and commit what it writes. Do not
+  edit the file by hand.
+- Use `--context kjuulh-prod` (or `FOREST_CONTEXT=kjuulh-prod`) on every forest
+  command. The default context on this machine may point at another
+  instance.
+- `forest validate` reports "Validated 0 component(s)", as it does for
+  tiny-web. To check the config against `kubernetes-app`'s `#Spec`, run
+  `cue vet` against the component's `forest.component.cue`.
+
+## Live
+
+- dev: https://dev.grund.run, namespace `dev` on clank-dev
+  (`~/.kube/clank-dev.yaml`)
+- prod: https://grund.run, namespace `prod` on clank-prod
+  (`~/.kube/clank-prod.yaml`)
+- Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
+  `revision` must equal the commit. Then run `ci/assert-http.sh`.
+
 ## Gotchas
 
 - **`build.rs` panics on purpose** when `site/` lacks `index.html` or
@@ -44,3 +70,10 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 ## Open items
 
 - The designed site (separate work). It drops into `site/` per REQUIREMENTS.md.
+- **www.grund.run has no Ingress or certificate yet.** `kubernetes-app`
+  0.1.12 renders a single `host`. The server already redirects www
+  (`GRUND_WEBSITE_REDIRECT_HOSTS`). What is missing is a component field for
+  additional hosts, added to the Certificate's `dnsNames` and the Ingress
+  rules and TLS hosts, then a bump here.
+- HSTS is off (`GRUND_WEBSITE_HSTS_MAX_AGE=0`). Turn it on in prod, starting
+  at 300, once https on grund.run and www.grund.run is proven.

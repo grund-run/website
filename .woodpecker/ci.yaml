@@ -1,0 +1,27 @@
+# Fast gates for every push and pull request: formatting, lints as errors, and
+# the unit tests. The release binary, its HTTP contract and the image live in
+# images.yaml, because the binary that passes the contract must be the one that
+# is packaged, and Woodpecker workflows do not share a workspace.
+
+when:
+  - event: push
+    branch: main
+  - event: pull_request
+  - event: manual
+
+labels:
+  platform: linux/amd64
+
+steps:
+  check:
+    # The same image images.yaml builds the shipped binary in, so a toolchain
+    # difference cannot pass here and fail there.
+    image: rust:1.98-alpine
+    environment:
+      CARGO_TERM_COLOR: always
+    commands:
+      - apk add --no-cache musl-dev
+      - rustup component add rustfmt clippy
+      - cargo fmt --all --check
+      - cargo clippy --all-targets --locked -- -D warnings
+      - cargo test --locked
