@@ -48,10 +48,9 @@ kjuulh: "kubernetes-app": {
 					GRUND_WEBSITE_REDIRECT_HOSTS:   "dev.grund.run"
 					// A pre-production host must never land in a search index.
 					GRUND_WEBSITE_NOINDEX: "true"
-					// Page views for grund insights (src/insights.rs), in dev only
-					// for now. The namespace-local Service name, not a hostname:
-					// in-cluster, plain http, never routed by an Ingress. Unset in
-					// prod, which reports nothing until Kasper turns it on.
+					// Page views for grund insights (src/insights.rs). The
+					// namespace-local Service name, not a hostname: in-cluster,
+					// plain http, never routed by an Ingress.
 					GRUND_WEBSITE_INSIGHTS_URL: "http://grund-insights:8081"
 					// Traefik sets this from the connection it saw. Until the edge
 					// forwards client addresses it is the gateway's, which
@@ -77,6 +76,10 @@ kjuulh: "kubernetes-app": {
 				env_vars: {
 					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://grund.sh"
 					GRUND_WEBSITE_REDIRECT_HOSTS:   "www.grund.sh,grund.run,www.grund.run"
+					// Page views for grund insights (src/insights.rs), as in dev:
+					// the namespace-local Service, plain http, in-cluster only.
+					GRUND_WEBSITE_INSIGHTS_URL:              "http://grund-insights:8081"
+					GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER: "X-Real-Ip"
 				}
 			}
 		}

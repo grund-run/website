@@ -101,7 +101,7 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 - `src/insights.rs` reports page views to grund insights (a private repo:
   grund's internal analytics). Server-side only: no script, no cookie, and
   the site's CSP is unchanged. It is **off unless `GRUND_WEBSITE_INSIGHTS_URL`
-  is set**, and that comes from forest config (dev only today), never from
+  is set**, and that comes from forest config (dev and prod), never from
   code.
 - It must never slow or fail a page: the middleware does a `try_send` into a
   bounded queue after the response exists, and the `grund-website/insights`
@@ -124,7 +124,8 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   insights down).
 - Verified 2026-09-24 on dev (website 3aa0e39): marked requests to
   https://dev.grund.sh arrived in dev insights as page views, and a
-  stylesheet request did not. Prod reports nothing (unset).
+  stylesheet request did not. Prod reports too since Kasper turned it on
+  (2026-09-24).
 
 ## Editing the site
 
