@@ -51,8 +51,13 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   gRPC. On this machine that instance is the `kjuulh-prod` context. Pass
   `--context kjuulh-prod` (or `FOREST_CONTEXT=kjuulh-prod`) on every command,
   because the default context points at a different forest instance.
-- `forest validate` reports "Validated 0 component(s)", as it does for
-  tiny-web. To check the config against `kubernetes-app`'s `#Spec`, run
+- On this machine the forest CLI resolves components and publishing
+  against the understory-prod instance, even with `FOREST_CONTEXT=kjuulh-prod`.
+  So `forest validate` and `forest release prepare` fail to find
+  newly published kjuulh components. CI's rollout step is the real render,
+  and a local `forest publish` would go to the wrong instance: never run it
+  here. Earlier, `forest validate` reported "Validated 0 component(s)", as it
+  does for tiny-web. To check the config against `kubernetes-app`'s `#Spec`, run
   `cue vet` against the component's `forest.component.cue`.
 
 ## Live
@@ -75,8 +80,9 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
     `rollout status` reports the old deployment as healthy, and prod stays
     on the old commit (happened 2026-09-24). Always confirm with the
     `revision` from https://grund.run/health/ready.
-  - **www.grund.run is broken** (Traefik default certificate) until
-    kubernetes-app supports additional hosts.
+  - www.grund.run is served from the same Ingress and certificate via
+    kubernetes-app 0.1.13 `additional_hosts`, and the server 308s it to
+    the apex.
 - Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").
@@ -248,10 +254,5 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   in development; every visual is captioned as an example. Pricing is
   deliberately absent (still an estimate). The call to action is GitHub,
   because there is no signup backend.
-- **www.grund.run has no Ingress or certificate yet.** `kubernetes-app`
-  0.1.12 renders a single `host`. The server already redirects www
-  (`GRUND_WEBSITE_REDIRECT_HOSTS`). What is missing is a component field for
-  additional hosts, added to the Certificate's `dnsNames` and the Ingress
-  rules and TLS hosts, then a bump here.
 - HSTS is off (`GRUND_WEBSITE_HSTS_MAX_AGE=0`). Turn it on in prod, starting
   at 300, once https on grund.run and www.grund.run is proven.
