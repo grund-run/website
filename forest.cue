@@ -23,7 +23,7 @@ _destinationTypes: {
 
 dependencies: {
 	"forest/deployment": version:        "0.3.0"
-	"kjuulh/kubernetes-app": version:    "0.1.13"
+	"kjuulh/kubernetes-app": version:    "0.1.12"
 	"kjuulh/woodpecker-forest": version: "0.1.10"
 }
 
@@ -53,11 +53,12 @@ kjuulh: "kubernetes-app": {
 			]
 			config: {
 				namespace: "prod"
-				host:      "grund.run"
-				// www gets its own route and certificate in the same Ingress
-				// (kubernetes-app 0.1.13), so the server's 308 to the apex is
-				// reachable.
-				additional_hosts: ["www.grund.run"]
+				// kubernetes-app 0.1.12 renders one host per deployment, so
+				// www.grund.run gets no Ingress or certificate from this file
+				// yet. The server already redirects it (below); what is missing
+				// is a component field for additional hosts. CLAUDE.md, "Open
+				// items".
+				host:     "grund.run"
 				replicas: 2
 				env_vars: {
 					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://grund.run"
