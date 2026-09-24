@@ -363,6 +363,46 @@ h1 {
   margin-top: 2.5rem;
 }
 
+/* The one-line install, under the hero's buttons. */
+.install {
+  max-width: 44rem;
+  margin-top: 2rem;
+}
+
+.install code {
+  display: block;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: rgb(15 21 18 / 0.9);
+  color: var(--text);
+  font: 0.86rem/1.6 var(--mono);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .install code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.install .prompt {
+  color: var(--accent-text);
+  user-select: none;
+}
+
+.install p {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.install a {
+  color: var(--text-2);
+}
+
 /* ─── Four facts ─────────────────────────────────────────────────────── */
 
 .facts {

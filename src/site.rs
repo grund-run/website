@@ -510,6 +510,55 @@ pub(crate) mod tests {
         );
     }
 
+    /// `curl -fsSL https://grund.run/install.sh | sh -s -- --domain …` must be
+    /// harmless until grund is released: it says so, exits non-zero, and
+    /// leaves the directory it runs in untouched. Runs the embedded bytes the
+    /// way the pipe does, on stdin.
+    #[test]
+    fn the_install_script_changes_nothing_until_grund_is_released() {
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+
+        let script = Site::embedded()
+            .get("install.sh")
+            .expect("install.sh is part of the site");
+        assert!(script.content_type.starts_with("text/plain"));
+
+        let dir = std::env::temp_dir().join(format!("grund-install-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let mut child = Command::new("sh")
+            .args(["-s", "--", "--domain", "app.example.com"])
+            .current_dir(&dir)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("sh is available");
+        child
+            .stdin
+            .take()
+            .unwrap()
+            .write_all(script.identity)
+            .unwrap();
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let left_behind = std::fs::read_dir(&dir).unwrap().count();
+        std::fs::remove_dir_all(&dir).unwrap();
+
+        assert_eq!(
+            output.status.code(),
+            Some(1),
+            "must not report success: {stdout}"
+        );
+        assert!(stdout.contains("not available yet"), "{stdout}");
+        assert!(stdout.contains("https://app.example.com"), "{stdout}");
+        assert!(stdout.contains("Nothing was changed"), "{stdout}");
+        assert_eq!(
+            left_behind, 0,
+            "the script wrote into its working directory"
+        );
+    }
+
     #[test]
     fn the_embedded_site_has_its_required_documents() {
         let site = Site::embedded();

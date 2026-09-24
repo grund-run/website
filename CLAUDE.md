@@ -140,8 +140,15 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   - two examples (homelab, SaaS);
   - features, ownership, who it's for and the cost.
 - Homelabs are in scope, which widens the audience beyond PLATFORM.md.
-- The CLI commands are invented and captioned as illustrative. Never show a
-  pasteable `curl … | sh`: grund.run serves HTML.
+- The CLI commands are invented and captioned as illustrative.
+- The hero shows `curl -fsSL https://grund.run/install.sh | sh -s -- --domain
+  app.example.com`. `site/install.sh` is a real script, served as text/plain.
+  Until grund is released it only prints that grund is not available, exits
+  1, and downloads, writes and changes nothing. Everything runs inside
+  `main()`, so a truncated download runs nothing.
+  `the_install_script_changes_nothing_until_grund_is_released` runs it the
+  way the pipe does and enforces that. When grund ships, the real installer
+  replaces it, and that test changes with it.
 - grund is labelled in development in the first line, and examples are
   captioned as examples. The call to action is GitHub, because there is no
   signup backend.

@@ -65,6 +65,10 @@
         <a class="button" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Follow the build</a>
         <a class="button ghost" href="#journey">How it works</a>
       </div>
+      <div class="install">
+        <code><span class="prompt">$</span> curl -fsSL https://grund.run/install.sh | sh -s -- --domain app.example.com</code>
+        <p>One command, run in your app's directory: grund installs itself and your app goes live. Not available yet; today it prints a notice and changes nothing. <a href="/install.sh">Read the script</a>.</p>
+      </div>
     </div>
   </section>
 
@@ -108,7 +112,7 @@
           </div>
           <div class="level-visual">
             <div class="shell">
-              <p><span class="prompt">$</span> grund init --server nuc.home.lan</p>
+              <p><span class="prompt">$</span> curl -fsSL https://grund.run/install.sh | sh</p>
               <p class="ok-line">✓ nuc is ready for apps</p>
             </div>
           </div>
