@@ -69,6 +69,12 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   - There is no prod trigger; each prod release is a deliberate promotion.
   - Forest's Flux webhook for clank-prod fails (non-fatal).
     `flux reconcile source git flux-system` makes it apply at once.
+  - Reconcile only **after** `forest release show <slug>` reports
+    `[prod] ... [SUCCEEDED]`. With `--no-wait`, a reconcile can run before
+    forest has committed the release: Flux applies the previous revision,
+    `rollout status` reports the old deployment as healthy, and prod stays
+    on the old commit (happened 2026-09-24). Always confirm with the
+    `revision` from https://grund.run/health/ready.
   - **www.grund.run is broken** (Traefik default certificate) until
     kubernetes-app supports additional hosts.
 - Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
