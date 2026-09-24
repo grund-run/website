@@ -1,8 +1,9 @@
 # Pricing research
 
 Status: research behind the **planned** pricing on grund.run/pricing. grund is
-not available; nothing here is a price anyone can pay yet. Decision for Kasper:
-the numbers on the page are a proposal.
+not available; nothing here is a price anyone can pay yet. The plan structure
+and license prices below are **Kasper's decision (2026-09-24)**. The grund
+machine prices are an Estimate built on provider costs.
 
 Sources: vendor pricing pages, read 2026-09-24 (Observed), and the survey in
 `huge-business-plan/tiny/docs/huge/research/selfhosted-paas.md`, read
@@ -41,26 +42,57 @@ $10k MRR.
   bring-your-own-server competitor does, and it is the point of running on
   your own hardware.
 
-## The proposal on the page (Estimate)
+## Decided (Kasper, 2026-09-24)
 
-| Plan | Price | For | Reasoning |
+Running your own machines should be cheap and fair, like Tailscale: it costs
+us little. The fee comes from Pro and Business, especially on machines rented
+through grund.
+
+| Plan | Your own machines (license) | Account fee |
+|---|---|---|
+| Homelab | first machine free, then €3 per machine/mo | none |
+| Pro | €10 per machine/mo | none |
+| Business | €10 per machine/mo | €49/mo |
+
+**grund machines**: servers rented through grund, priced by size. They carry
+**no per-machine license**, because the price already includes our fee. They
+are available on every plan.
+
+There is no separate "Self-hosted" plan any more; the free Homelab machine is
+the free tier. This replaces the earlier proposal (Self-hosted free, Homelab
+€5 for 3, Pro €15, Business €49 + €15).
+
+## grund machine prices (Estimate)
+
+The underlying cost is Hetzner, from its price adjustment effective
+2026-06-15 (Observed 2026-09-24, docs.hetzner.com). The Cost-Optimized cloud
+tier (CX, CAX) shows "Currently not available", so rentable capacity starts at
+Regular Performance:
+
+| Hetzner type | €/mo excl. VAT |
+|---|---|
+| CPX22 / CPX32 / CPX42 / CPX52 | 19.49 / 35.49 / 69.49 / 100.49 |
+| CX23 / CX33 / CX43 (unavailable) | 5.49 / 8.49 / 15.99 |
+| AX42-1 dedicated (Ryzen 7 PRO 8700GE, 64 GB ECC, 2×512 GB NVMe) | 97.30 |
+
+| grund machine | Offered as | Price | Cost basis |
 |---|---|---|---|
-| Self-hosted | free forever | everyone | Table stakes. Unlimited apps and machines, so the free version is the product, not a trial |
-| Homelab | €5/mo, up to 3 machines | homes and hobby projects | In the hobby band (Coolify $5 for 2, Dokploy $4.50 each); a flat price is simpler for a household than per-machine arithmetic |
-| Pro | €15 per machine/mo | businesses | Middle of the business band (Hatchbox $15, Omni $25); matches PLATFORM.md's €15 per node |
-| Business | €49/mo + €15 per machine | teams that need SSO and an audit log | PLATFORM.md's Business shape; team features are the conventional line |
+| Small | 2 vCPU, 4 GB | €29/mo | CPX22 class, €19.49 |
+| Medium | 4 vCPU, 8 GB | €45/mo | CPX32 class, €35.49 |
+| Large | 8 vCPU, 16 GB | €79/mo | CPX42 class, €69.49 |
+| Dedicated | 8 cores, 64 GB, 2×512 GB NVMe | €109/mo | AX42-1, €97.30 |
 
-Yearly billing: two months free (about 17%, close to the market's 20%).
+The rule is provider cost plus about €10, the same as a Pro license, rounded.
+Margins are €9.51 / €9.51 / €9.51 / €11.70. So a grund machine costs what the
+same server would cost you rented directly and licensed on Pro: neither a
+penalty nor a subsidy for bringing your own. **Not established:** the exact vCPU, RAM and disk of each
+CPX type. Hetzner's docs pages fetched did not list them, so the sizes are
+what grund offers, and the mapping to CPX types is to be confirmed before
+launch. Hetzner has raised prices twice in 2026; these numbers move with it.
 
-What paid plans add is what we host or do for you: the hosted dashboard,
-alerts to phone and email, automatic grund updates, team members, support.
-Deploying apps is never gated.
+## Still open
 
-## Not decided
-
-- Whether Homelab is also free for non-commercial use, as Portainer's Home &
-  Student is. It costs us little, and it wins the homelab audience's goodwill.
 - The currency shown to non-EU visitors.
-- A one-time Homelab licence (Unraid-style) instead of monthly.
-- Any limit on Pro, such as a minimum of two machines, as PLATFORM.md
-  suggested. It is left out for simplicity.
+- Whether Homelab machines beyond the first get a one-time option.
+- Storage and bandwidth limits on grund machines (Hetzner includes traffic
+  allowances; to be matched).

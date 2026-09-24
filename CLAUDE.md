@@ -126,15 +126,16 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   captioned as examples. The call to action is GitHub, because there is no
   signup backend.
 - `/pricing` (`site/pricing.html`) shows **planned** pricing, labelled as
-  such in its first line:
-  - Self-hosted: free forever, deploying never gated;
-  - Homelab: €5/mo, up to 3 machines;
-  - Pro: €15 per machine per month;
-  - Business: €49/mo + €15 per machine;
-  - plus a comparison table and FAQ.
-  The research and reasoning are in `design/pricing-research.md`; the
-  numbers are a proposal for Kasper. Price by the machine, never by traffic
-  or app count.
+  such in its first line. The model is Kasper's (2026-09-24):
+  - Homelab: first machine free, then €3 per machine per month;
+  - Pro: €10 per machine;
+  - Business: €49 per month plus €10 per machine;
+  - **grund machines** (rented through grund, priced by size: €29 / €45 /
+    €79 / €109) carry no license fee.
+  Running your own should stay cheap, like Tailscale. The machine prices are
+  an Estimate at provider cost plus about €10; the cost basis and what is
+  not established are in `design/pricing-research.md`. Price by the machine,
+  never by traffic or app count.
 - `/licenses` (`site/licenses.html`) holds the copyright notices and
   licenses for third-party material (the OFL fonts), with full texts under
   `site/licenses/`. Nowhere else on the site names them; the footer has one
