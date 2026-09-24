@@ -96,6 +96,33 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").
 
+## insights (page views)
+
+- `src/insights.rs` reports page views to grund insights (a private repo:
+  grund's internal analytics). Server-side only: no script, no cookie, and
+  the site's CSP is unchanged. It is **off unless `GRUND_WEBSITE_INSIGHTS_URL`
+  is set**, and that comes from forest config (dev only today), never from
+  code.
+- It must never slow or fail a page: the middleware does a `try_send` into a
+  bounded queue after the response exists, and the `grund-website/insights`
+  component batches and POSTs with a 2 s timeout, dropping on any failure.
+  Do not add retries, buffering to disk or a blocking send.
+- What leaves the server is decided in `page_view`/`is_view` (pure,
+  unit-tested): the path without its query string, the status, the Referer's
+  host, three utm tags, the user agent, and the client address from the one
+  configured header. Anything more is a privacy change: it needs the insights
+  design doc (docs/design/tracking.md there) changed first.
+- Today the edge does not pass client addresses through to the pods, so
+  insights counts views but not visitors.
+  `GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER=X-Real-Ip` is set in dev so that
+  it starts working when the edge forwards addresses.
+- No endpoint or secret goes in this repo. The dev destination in forest.cue
+  is the namespace-local Service name; a token, if insights ever requires
+  one, is a `secret_env` entry, never a literal.
+- Tests: `insights::tests` (what is sent) and
+  `tests/accepttest/insights.rs` (a stub receiver; pages keep serving with
+  insights down).
+
 ## Editing the site
 
 - The palette and type come from `design/reference/dashboard-overview.png`,

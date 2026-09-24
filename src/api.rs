@@ -62,6 +62,9 @@ pub fn router(state: State) -> Router {
         .route("/health/ready", get(ready))
         .fallback(serve_site)
         .layer(middleware::from_fn_with_state(state.clone(), canonical_host))
+        // Outside the canonical-host redirect, so alias redirects (308) are
+        // seen and skipped; inside the timeout. Off unless configured.
+        .layer(middleware::from_fn_with_state(state.clone(), crate::insights::capture))
         .with_state(state)
         .layer(TimeoutLayer::with_status_code(
             StatusCode::SERVICE_UNAVAILABLE,
@@ -249,7 +252,7 @@ mod tests {
             Config::try_parse_from(std::iter::once("grund-website").chain(args.iter().copied()))
                 .unwrap();
         config.validate().unwrap();
-        router(State::new(config, fixture()))
+        router(State::new(config, fixture(), None))
     }
 
     async fn send(app: Router, request: Request<Body>) -> (StatusCode, HeaderMap, Vec<u8>) {

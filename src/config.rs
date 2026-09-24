@@ -57,6 +57,27 @@ pub struct Config {
     #[arg(long, env = "GRUND_WEBSITE_SHUTDOWN_GRACE", value_parser = secs, default_value = "10")]
     pub shutdown_grace: Duration,
 
+    /// Where page views are reported: the base URL of grund insights' ingest
+    /// listener, plain http inside the cluster (e.g. http://grund-insights:8081).
+    /// Unset, nothing is reported. Comes from forest config, never from code.
+    #[arg(long, env = "GRUND_WEBSITE_INSIGHTS_URL")]
+    pub insights_url: Option<String>,
+
+    /// Bearer token for the ingest listener, when insights requires one.
+    #[arg(long, env = "GRUND_WEBSITE_INSIGHTS_TOKEN", hide_env_values = true)]
+    pub insights_token: Option<String>,
+
+    /// The request header that carries the client address as the edge saw it
+    /// (Traefik sets X-Real-Ip). Unset, no address is reported, and insights
+    /// counts views but not visitors.
+    #[arg(long, env = "GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER")]
+    pub insights_client_ip_header: Option<String>,
+
+    /// The site name page views are reported under. Defaults to the host of
+    /// GRUND_WEBSITE_CANONICAL_ORIGIN.
+    #[arg(long, env = "GRUND_WEBSITE_INSIGHTS_SITE")]
+    pub insights_site: Option<String>,
+
     #[arg(long, env = "GRUND_WEBSITE_LOG_FORMAT", value_parser = ["compact", "json"], default_value = "compact")]
     pub log_format: String,
 
@@ -111,6 +132,33 @@ impl Config {
             !self.request_timeout.is_zero(),
             "GRUND_WEBSITE_REQUEST_TIMEOUT must be positive"
         );
+        self.insights_url = self
+            .insights_url
+            .take()
+            .filter(|url| !url.trim().is_empty());
+        if let Some(url) = &self.insights_url {
+            let authority = url.trim_end_matches('/').strip_prefix("http://");
+            anyhow::ensure!(
+                authority.is_some_and(|a| !a.is_empty() && !a.contains('/')),
+                "GRUND_WEBSITE_INSIGHTS_URL must be a plain http base URL with no path, e.g. \
+                 http://grund-insights:8081 (in-cluster; there is no TLS client), got {url:?}"
+            );
+            let site = self
+                .insights_site
+                .clone()
+                .unwrap_or_else(|| canonical_host.clone());
+            anyhow::ensure!(
+                is_hostname(&site),
+                "GRUND_WEBSITE_INSIGHTS_SITE must be a bare host name, got {site:?}"
+            );
+            self.insights_site = Some(site);
+        }
+        if let Some(name) = &self.insights_client_ip_header {
+            anyhow::ensure!(
+                axum::http::HeaderName::from_bytes(name.as_bytes()).is_ok(),
+                "GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER must be a header name, got {name:?}"
+            );
+        }
         Ok(())
     }
 
@@ -238,6 +286,28 @@ mod tests {
     #[test]
     fn a_grace_period_longer_than_the_kubelets_is_refused() {
         assert!(parse(&["--shutdown-grace", "31"]).is_err());
+    }
+
+    #[test]
+    fn insights_is_off_by_default_and_reports_under_the_canonical_host() {
+        assert!(parse(&[]).unwrap().insights_url.is_none());
+        let config = parse(&["--insights-url", "http://grund-insights:8081"]).unwrap();
+        assert_eq!(config.insights_site.as_deref(), Some("grund.sh"));
+    }
+
+    #[test]
+    fn an_insights_url_with_a_path_or_tls_is_refused() {
+        for url in [
+            "https://insights.example",
+            "http://grund-insights:8081/v1",
+            "grund-insights:8081",
+        ] {
+            let error = parse(&["--insights-url", url]).unwrap_err().to_string();
+            assert!(
+                error.contains("GRUND_WEBSITE_INSIGHTS_URL"),
+                "{url}: {error}"
+            );
+        }
     }
 
     #[test]

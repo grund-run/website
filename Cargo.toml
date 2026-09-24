@@ -11,6 +11,11 @@ publish = false
 anyhow = "1"
 axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio"] }
 clap = { version = "4", features = ["derive", "env"] }
+# The insights sender: plain HTTP/1.1 to an in-cluster service, so no TLS
+# stack. Both crates are already in the tree through axum.
+http-body-util = "0.1"
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["client-legacy", "http1", "tokio"] }
 notmad = "0.14"
 percent-encoding = "2"
 serde_json = "1"
@@ -27,7 +32,6 @@ flate2 = "1"
 sha2 = "0.11"
 
 [dev-dependencies]
-http-body-util = "0.1"
 # The accepttests speak raw HTTP/1.1 so that what they assert is what went over
 # the wire: traversal probes are sent unnormalised, and a HEAD body would be
 # seen. TLS is for running them against a live https origin. ring, not the

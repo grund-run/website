@@ -29,6 +29,10 @@ Configuration is flags or environment variables. There are no config files.
 | `GRUND_WEBSITE_HSTS_MAX_AGE` | `0` (off) | HSTS max-age in seconds |
 | `GRUND_WEBSITE_REQUEST_TIMEOUT` | `10` | Seconds per request |
 | `GRUND_WEBSITE_SHUTDOWN_GRACE` | `10` | Seconds to drain on SIGTERM, at most 30 |
+| `GRUND_WEBSITE_INSIGHTS_URL` | unset (off) | Base URL of grund insights' in-cluster ingest listener; page views are reported only when set |
+| `GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER` | unset | Header carrying the client address as the edge saw it (`X-Real-Ip` behind Traefik) |
+| `GRUND_WEBSITE_INSIGHTS_TOKEN` | unset | Bearer token, when insights requires one (a secret) |
+| `GRUND_WEBSITE_INSIGHTS_SITE` | canonical host | Site name the views are reported under |
 | `GRUND_WEBSITE_LOG_FORMAT` | `compact` | `compact` or `json` (the image sets `json`) |
 | `RUST_LOG` | `grund_website=info,notmad=info,info` | Log filter |
 

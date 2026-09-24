@@ -69,6 +69,18 @@ must meet, and what is deliberately not done. How to run it is in
 - **Deployment is provable.** `/health/ready` reports `revision` (the commit
   compiled in from `CI_COMMIT_SHA`) and `site_digest` (SHA-256 over every
   embedded path and hash).
+- **Page views never cost a page.** When `GRUND_WEBSITE_INSIGHTS_URL` is set
+  (off by default), each GET for a document is reported to grund insights
+  after its response is built: an allocation and a non-blocking push into a
+  1,024-event queue. A full queue drops the event. A background task batches
+  up to 100 events or 1 s and POSTs them with a 2 s timeout; a failed POST
+  drops the batch and is counted in a once-a-minute warning. Reported: path
+  without its query string, status, the Referer's host only, `utm_source`,
+  `utm_medium`, `utm_campaign`, the user agent, and the client address only
+  from `GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER`. Not reported: HEAD,
+  redirects, assets, health probes. Accepttests
+  `insights::a_page_view_reaches_insights_without_its_query_string` and
+  `insights::pages_still_serve_at_once_when_insights_is_down`.
 - **Graceful shutdown.** SIGTERM drains in-flight requests for up to
   `GRUND_WEBSITE_SHUTDOWN_GRACE` (default 10 s, maximum 30 s, the kubelet's
   default grace period).
@@ -98,12 +110,16 @@ must meet, and what is deliberately not done. How to run it is in
 - **No 406.** A client refusing identity still gets identity, which RFC 9110
   permits.
 - **No third-party fonts, scripts or analytics.** Inter and JetBrains Mono are
-  self-hosted (SIL OFL 1.1, licenses served under `/licenses/`).
-- **No CA bundle in the image.** The server makes no outbound connections.
+  self-hosted (SIL OFL 1.1, licenses served under `/licenses/`). Analytics are
+  first-party and server-side (above): no script, no cookie.
+- **No retries or buffering for page views.** Losing some views while
+  insights is down is the price of never making a page wait.
+- **No CA bundle in the image.** The only outbound connection is plain HTTP
+  to insights inside the cluster; there is no TLS client.
 
 ## Verification
 
-- `cargo test --locked`: 42 unit tests, and 16 accepttests
+- `cargo test --locked`: 51 unit tests, and 18 accepttests
   (`tests/accepttest/`) against a spawned binary. The accepttests take
   `GRUND_WEBSITE_ACCEPT_URL` to run against the image or a live origin instead.
 - The two records below were made with `ci/assert-http.sh` (62 checks), the

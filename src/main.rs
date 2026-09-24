@@ -13,6 +13,7 @@
 mod api;
 mod canonical;
 mod config;
+mod insights;
 mod server;
 mod site;
 mod state;
@@ -36,13 +37,34 @@ async fn main() -> anyhow::Result<()> {
     );
 
     let grace = config.shutdown_grace;
-    let state = State::new(config, site);
+    // Page views for grund insights, only when configured (insights.rs).
+    let (insights, sender) = match &config.insights_url {
+        Some(url) => {
+            let (insights, receiver) =
+                insights::Insights::channel(config.insights_client_ip_header.clone());
+            let site = config.insights_site.clone().unwrap_or_default();
+            tracing::info!(%site, client_ip = config.insights_client_ip_header.is_some(), "reporting page views to insights");
+            let sender = insights::Sender::new(
+                url,
+                site,
+                config.insights_token.clone(),
+                &insights,
+                receiver,
+            )?;
+            (Some(insights), Some(sender))
+        }
+        None => (None, None),
+    };
+    let state = State::new(config, site, insights);
 
-    notmad::Mad::builder()
-        .add(server::Http::new(state))
-        .cancellation(Some(grace))
-        .run()
-        .await?;
+    // The listener first, so it stops taking requests before the sender
+    // makes its last, bounded send.
+    let mut mad = notmad::Mad::builder();
+    mad.add(server::Http::new(state));
+    if let Some(sender) = sender {
+        mad.add(sender);
+    }
+    mad.cancellation(Some(grace)).run().await?;
     Ok(())
 }
 
