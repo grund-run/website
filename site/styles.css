@@ -1,5 +1,5 @@
 /*
- * grund.run. The palette and type are taken from the grund dashboard design
+ * grund.sh. The palette and type are taken from the grund dashboard design
  * (design/reference/dashboard-overview.png), so the site and the product read
  * as one thing. Served outside assets/, so it revalidates on every load and
  * can be edited without renaming. Fonts are self-hosted: the CSP allows

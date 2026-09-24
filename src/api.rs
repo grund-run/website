@@ -268,7 +268,7 @@ mod tests {
 
     fn get(path: &str) -> Request<Body> {
         Request::get(path)
-            .header("host", "grund.run")
+            .header("host", "grund.sh")
             .body(Body::empty())
             .unwrap()
     }
@@ -366,15 +366,12 @@ mod tests {
     #[tokio::test]
     async fn an_alias_host_redirects_permanently_to_the_canonical_origin() {
         let request = Request::get("/docs/?ref=x")
-            .header("host", "www.grund.run")
+            .header("host", "www.grund.sh")
             .body(Body::empty())
             .unwrap();
-        let (status, headers, _) = send(app(&["--redirect-hosts", "www.grund.run"]), request).await;
+        let (status, headers, _) = send(app(&["--redirect-hosts", "www.grund.sh"]), request).await;
         assert_eq!(status, StatusCode::PERMANENT_REDIRECT);
-        assert_eq!(
-            header(&headers, "location"),
-            "https://grund.run/docs/?ref=x"
-        );
+        assert_eq!(header(&headers, "location"), "https://grund.sh/docs/?ref=x");
         assert_eq!(header(&headers, "cache-control"), REDIRECT_CACHE);
     }
 
@@ -389,7 +386,7 @@ mod tests {
     #[tokio::test]
     async fn every_kind_of_response_carries_the_security_headers() {
         let alias = Request::get("/")
-            .header("host", "www.grund.run")
+            .header("host", "www.grund.sh")
             .body(Body::empty())
             .unwrap();
         let requests = [
@@ -402,7 +399,7 @@ mod tests {
         ];
         for request in requests {
             let path = request.uri().to_string();
-            let (_, headers, _) = send(app(&["--redirect-hosts", "www.grund.run"]), request).await;
+            let (_, headers, _) = send(app(&["--redirect-hosts", "www.grund.sh"]), request).await;
             assert_eq!(header(&headers, "content-security-policy"), CSP, "{path}");
             assert_eq!(
                 header(&headers, "x-content-type-options"),

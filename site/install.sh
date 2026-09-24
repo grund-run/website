@@ -1,7 +1,7 @@
 #!/bin/sh
 # grund installer
 #
-#   curl -fsSL https://grund.run/install.sh | sh -s -- --domain app.example.com
+#   curl -fsSL grund.sh/install | sh -s -- --domain app.example.com
 #
 # One command, run on the machine that will host your app, from the app's
 # directory. When grund is released it will install grund on this machine and

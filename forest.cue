@@ -1,4 +1,5 @@
-// Forest manifest for grund.run.
+// Forest manifest for grund.sh, grund's main site (grund.run redirects here
+// until it becomes the domain for customer apps).
 //
 // Deployed to the existing homelab clusters (clank-dev, clank-prod) through
 // the kjuulh organisation's Flux destinations, the same path the tiny
@@ -37,10 +38,14 @@ kjuulh: "kubernetes-app": {
 			]
 			config: {
 				namespace: "dev"
-				host:      "dev.grund.run"
-				replicas:  1
+				host:      "dev.grund.sh"
+				// dev.grund.run was the dev host before grund.sh became the main
+				// site; it keeps working as a redirect.
+				additional_hosts: ["dev.grund.run"]
+				replicas: 1
 				env_vars: {
-					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://dev.grund.run"
+					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://dev.grund.sh"
+					GRUND_WEBSITE_REDIRECT_HOSTS:   "dev.grund.run"
 					// A pre-production host must never land in a search index.
 					GRUND_WEBSITE_NOINDEX: "true"
 				}
@@ -53,15 +58,16 @@ kjuulh: "kubernetes-app": {
 			]
 			config: {
 				namespace: "prod"
-				host:      "grund.run"
-				// www gets its own route and certificate in the same Ingress
-				// (kubernetes-app 0.1.13), so the server's 308 to the apex is
-				// reachable.
-				additional_hosts: ["www.grund.run"]
+				// grund.sh is the main site (Kasper, 2026-09-24). grund.run
+				// becomes the domain for customer apps; until then its apex and
+				// www redirect here, as does www.grund.sh. All four names share
+				// one Ingress and certificate (kubernetes-app 0.1.13).
+				host: "grund.sh"
+				additional_hosts: ["www.grund.sh", "grund.run", "www.grund.run"]
 				replicas: 2
 				env_vars: {
-					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://grund.run"
-					GRUND_WEBSITE_REDIRECT_HOSTS:   "www.grund.run"
+					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://grund.sh"
+					GRUND_WEBSITE_REDIRECT_HOSTS:   "www.grund.sh,grund.run,www.grund.run"
 				}
 			}
 		}

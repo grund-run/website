@@ -40,8 +40,8 @@ echo "  ok   scratch image builds ($(docker images "$img" --format '{{.Size}}'))
 echo "runtime (read-only, as deployed)"
 cleanup
 docker run -d --name "$name" --read-only -p "127.0.0.1:$port:8080" \
-  -e GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.run "$img" >/dev/null
-if ! GRUND_WEBSITE_ACCEPT_URL="http://127.0.0.1:$port" GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.run \
+  -e GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.sh "$img" >/dev/null
+if ! GRUND_WEBSITE_ACCEPT_URL="http://127.0.0.1:$port" GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.sh \
   cargo test --locked --test tests; then
   docker logs "$name"
   exit 1

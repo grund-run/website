@@ -57,12 +57,19 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 ## Live
 
-- dev: https://dev.grund.run, namespace `dev` on clank-dev
+- **grund.sh is the main site; grund.run is becoming the domain for customer
+  apps** (Kasper, 2026-09-24; `design/app-domains.md`). Until the apps
+  platform exists, grund.run, www.grund.run and www.grund.sh 308 to
+  https://grund.sh, and dev.grund.run to https://dev.grund.sh. All the names
+  of an environment share one Ingress and certificate (kubernetes-app 0.1.13
+  `additional_hosts`).
+- dev: https://dev.grund.sh, namespace `dev` on clank-dev
   (`~/.kube/clank-dev.yaml`). Public since 2026-09-24:
-  - Cloudflare DNS from grund/terraform;
-  - ratchet SNI route from kjuulh/clank-homelab;
-  - cert-manager DNS-01 through the grund.run solver in clank-homelab-flux.
-- prod: https://grund.run, namespace `prod` on clank-prod
+  - Cloudflare DNS from grund/terraform (both zones);
+  - ratchet SNI routes from kjuulh/clank-homelab;
+  - cert-manager DNS-01 through the grund solver (grund.sh, grund.run) in
+    clank-homelab-flux.
+- prod: https://grund.sh, namespace `prod` on clank-prod
   (`~/.kube/clank-prod.yaml`), 2 replicas. Live since 2026-09-24.
   - Promoted by hand, as Kasper cleared:
     `forest release release <slug> --environment prod`.
@@ -74,16 +81,17 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
     forest has committed the release: Flux applies the previous revision,
     `rollout status` reports the old deployment as healthy, and prod stays
     on the old commit (happened 2026-09-24). Always confirm with the
-    `revision` from https://grund.run/health/ready.
-  - www.grund.run is served from the prod Ingress through kubernetes-app
-    0.1.13's `additional_hosts`, on the same certificate as the apex, and the
-    server 308s it to https://grund.run. forest-components' CI publishes
+    `revision` from https://grund.sh/health/ready.
+  - www.grund.sh, grund.run and www.grund.run are served from the prod
+    Ingress through kubernetes-app 0.1.13's `additional_hosts`, on the same
+    certificate, and the server 308s them to https://grund.sh.
+    forest-components' CI publishes
     each version to both forest servers since 2026-09-24 (it used to publish
     only to forest.i.kjuulh.io, which releases do not read).
   - Never `forest publish` from this machine: forest 0.3.13 sends it to
     https://api.forest.understory.sh whatever `--context` or
     `--forest-server` says (seen in a `-vv --dry-run`).
-- Prove what is deployed: `curl -s https://dev.grund.run/health/ready`. The
+- Prove what is deployed: `curl -s https://dev.grund.sh/health/ready`. The
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").
 
@@ -138,8 +146,9 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   - features, ownership, who it's for and the cost.
 - Homelabs are in scope, which widens the audience beyond PLATFORM.md.
 - The CLI commands are invented and captioned as illustrative.
-- The hero shows `curl -fsSL https://grund.run/install.sh | sh -s -- --domain
-  app.example.com`. `site/install.sh` is a real script, served as text/plain.
+- The hero shows `curl -fsSL grund.sh/install | sh -s -- --domain
+  app.example.com`. `site/install.sh` is a real script, served as text/plain
+  at `/install` and `/install.sh` (the resolver maps `/name` to `name.sh`).
   Until grund is released it only prints that grund is not available, exits
   1, and downloads, writes and changes nothing. Everything runs inside
   `main()`, so a truncated download runs nothing.
@@ -217,7 +226,7 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 - This widens the audience beyond PLATFORM.md, which excluded hobbyists.
   Homelabs are now in scope, and the page says so.
 - The CLI commands in the journey are invented and captioned as illustrative.
-  Never show a pasteable `curl … | sh`: grund.run serves HTML.
+  The one real command is the install one-liner (see below).
 - Every visual is captioned as an example; grund is labelled in development
   in the first line. Pricing is deliberately absent (still an estimate). The
   call to action is GitHub, because there is no signup backend.
@@ -267,10 +276,5 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   in development; every visual is captioned as an example. Pricing is
   deliberately absent (still an estimate). The call to action is GitHub,
   because there is no signup backend.
-- **www.grund.run has no Ingress or certificate yet.** `kubernetes-app`
-  0.1.12 renders a single `host`. The server already redirects www
-  (`GRUND_WEBSITE_REDIRECT_HOSTS`). What is missing is a component field for
-  additional hosts, added to the Certificate's `dnsNames` and the Ingress
-  rules and TLS hosts, then a bump here.
 - HSTS is off (`GRUND_WEBSITE_HSTS_MAX_AGE=0`). Turn it on in prod, starting
-  at 300, once https on grund.run and www.grund.run is proven.
+  at 300, once https on grund.sh and every name that redirects to it is proven.

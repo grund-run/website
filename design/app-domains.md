@@ -1,14 +1,18 @@
 # Design: an address for every app
 
 Status: **proposed design, not built.** Kasper's idea (2026-09-24), agreed
-in principle. The decisions marked *Decision for Kasper* are open.
+in principle. **Decided (Kasper, 2026-09-24): grund.sh is the main site, and
+grund.run is the apps domain.** The decisions marked *Decision for Kasper*
+are open.
 
 ## What exists today
 
-Nothing in the product: grund is in development. The only DNS grund runs is
-its own zone, grund.run, in `grund/terraform` (`stacks/cloudflare`). There,
-cert-manager issues per-host certificates by DNS-01 through a
-Cloudflare solver scoped to grund.run (clank-homelab-flux `6ce4241`).
+Nothing in the product: grund is in development. grund runs two zones in
+`grund/terraform` (`stacks/cloudflare`):
+- grund.sh, the main site;
+- grund.run, which today only redirects to grund.sh.
+cert-manager issues per-host certificates for both by DNS-01 through the
+grund Cloudflare solver (clank-homelab-flux `6ce4241`, `d7f992c`).
 
 ## The idea in one line
 
@@ -16,59 +20,59 @@ Cloudflare solver scoped to grund.run (clank-homelab-flux `6ce4241`).
 touching DNS. When they want their own domain, grund can verify it, or run
 the whole zone for them.**
 
-## 1. App addresses on a grund apps domain
+## 1. App addresses on grund.run
 
-`<app>-<account>.<apps-domain>`, for example
-`photos-kasper.grundapps.net`. It is free on every hosted plan, including
-Homelab's free machine.
+`<app>-<account>.grund.run`, for example `photos-kasper.grund.run`. It is
+free on every hosted plan, including Homelab's free machine.
 
-### Decision: a separate domain, not `*.apps.grund.run`
+### Decision: customer apps and grund's own site never share a domain
 
-Customer content under the product domain puts grund.run at risk:
+grund's site, dashboard and installer live on grund.sh. Customer apps get
+grund.run, whose apex and www only redirect to grund.sh. Customer content
+under the product domain would put the product at risk:
 
 - **Reputation.** One phishing app can get the registrable domain flagged by
   Google Safe Browsing or mail and DNS blocklists. That would take grund.run,
-  the dashboard and `install.sh` down with it.
-- **Cookies.** Without a Public Suffix List entry, any `*.apps.grund.run`
-  page can set cookies for `grund.run`, where the dashboard session lives.
+  the dashboard and the installer down with it.
+- **Cookies.** Without a Public Suffix List entry, any app page could set
+  cookies for the domain the dashboard session lives on.
 - **Certificate rate limits.** Let's Encrypt limits certificates per
-  registered domain; app hostnames would compete with grund.run's own.
+  registered domain; app hostnames would compete with the site's own.
 
 Established practice separates the two: `github.io` / `github.com`,
-`vercel.app`, `fly.dev`, `netlify.app`. NAMING.md already recommends a
-separate customer-app domain on the PSL.
+`vercel.app`, `fly.dev`, `netlify.app`. NAMING.md already recommended a
+separate customer-app domain on the PSL. grund.run suits the job: `.run` is a
+generic TLD under ICANN contract, which suits addresses customers bake into
+bookmarks and integrations better than a country-code TLD like `.sh`.
 
 ### Decision: a wildcard certificate, flat names
 
-- One `*.<apps-domain>` certificate by DNS-01, since grund controls that
+- One `*.grund.run` certificate by DNS-01, since grund controls that
   zone, instead of a certificate per app. Issuance is then independent of
   the number of apps.
 - Names are flat (`<app>-<account>`), not nested
   (`<app>.<account>.…`). A wildcard covers exactly one label, and a nested
   scheme would need a certificate per account.
-- The apps zone's CAA allows `issuewild` for the CA. grund.run keeps
-  forbidding wildcards.
+- grund.run's CAA must then allow `issuewild` for the CA; today it forbids
+  wildcards. grund.sh keeps forbidding them.
 
 ### Decision: register the domain on the Public Suffix List
 
 Each app becomes its own registrable domain, so cookies and most reputation
 decisions stay per app. PSL inclusion is a pull request with verification
-and takes weeks. Start it as soon as the domain is registered.
+and takes weeks. The PSL asks for at least two years of registration
+remaining when you apply. grund.run was registered on 2026-09-24 for one
+year, so extend it first. Nothing customer-controlled goes on grund.run
+before the entry is merged.
 
-### Candidate domains (RDAP, 2026-09-24; nothing registered)
+### Domains considered (RDAP, 2026-09-24)
 
-| Domain | Status | Notes |
-|---|---|---|
-| grundapps.net | unregistered | Descriptive and conventional. Our recommendation |
-| grundapps.com | unregistered | Register alongside, to stop squatting |
-| grund.page | unregistered | Short; `.page` is HSTS-preloaded (always HTTPS) and run by Google Registry |
-| grundusercontent.com | unregistered | Clear but long; suits raw content better than apps |
-| grund.site, grund.host, grund.pub, grund.zone, grund.onl | unregistered | Cheap TLDs with weaker reputation and more corporate blocklisting. Avoid |
-| grund.network | unregistered | Possible home for nameserver hostnames |
-| grund.app, grund.live, grunddns.net | registered by others | — |
-
-Prices were not checked; confirm at checkout, including premium pricing.
-*Decision for Kasper:* which domain.
+grundapps.net/.com, grund.page and grundusercontent.com were unregistered;
+grund.app and grund.live are taken. **Decided instead: move the site to
+grund.sh (registered 2026-09-24) and give grund.run to apps.** This keeps
+the short, brandable `.sh` for the product and installer
+(`curl -fsSL grund.sh/install | sh`), and the stable generic TLD for
+customer addresses.
 
 ## 2. Reaching the app
 
@@ -89,12 +93,12 @@ than with machines. It needs a stated allowance before launch.
 
 ### Layer 1: a specific domain (Pro and above)
 
-1. The customer adds `CNAME app.customer.com → <app>-<account>.<apps-domain>`.
+1. The customer adds `CNAME app.customer.com → <app>-<account>.grund.run`.
 2. They add `TXT _grund.app.customer.com → <verification token>`. This
    proves the domain is theirs, not just pointed at us.
 3. grund issues the certificate at its edge. Behind a proxy or relay, the
    customer delegates the challenge once with `CNAME
-   _acme-challenge.app.customer.com → <id>.acme.<apps-domain>`, and grund
+   _acme-challenge.app.customer.com → <id>.acme.grund.run`, and grund
    answers DNS-01 in its own zone. Renewals then need nothing further.
 
 **Takeover protection.** A hostname binds to the account that verified it.
@@ -111,7 +115,7 @@ removing it removes them. The customer can still add their own records
 (mail, verification TXTs).
 
 - The nameservers need hostnames on a domain grund controls, for example
-  `ns1.grund.run` or `ns1.grund.network`.
+  `ns1.grund.sh`: on the product domain, not the apps domain.
 - Build or buy: run authoritative DNS ourselves (PowerDNS or Knot on a few
   machines, with anycast later), or start on a provider API (Hetzner DNS,
   Cloudflare for SaaS) behind one interface and move later.
@@ -123,7 +127,7 @@ removing it removes them. The customer can still add their own records
 Open source first: the self-hosted edition does all of this **with the
 user's own DNS provider**, through its API (Cloudflare, Hetzner DNS, Route 53
 and others): app records, certificates, custom domains and zones. What only
-the hosted plans add is grund's apps domain, the relay, and grund-run
+the hosted plans add is grund.run addresses, the relay, and grund-run
 nameservers. "You can always run all of it yourself" stays true.
 
 ## 5. Abuse
@@ -152,7 +156,7 @@ Deliberately not planned: content scanning of apps.
 
 ## Decisions for Kasper
 
-1. The apps domain (recommendation: grundapps.net, with .com alongside).
+1. ~~The apps domain~~ Decided: grund.run (grund.sh is the site).
 2. The relay allowance on Homelab, and fair use on paid plans.
 3. Layer 2 nameserver hostnames, and build versus buy for authoritative DNS.
 4. Whether layer 2 is Pro or Business only (proposed: Pro, with DNSSEC and

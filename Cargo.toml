@@ -3,7 +3,7 @@ name = "grund-website"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.98"
-description = "The server behind grund.run: serves a static site embedded at build time"
+description = "The server behind grund.sh: serves a static site embedded at build time"
 license = "MIT"
 publish = false
 

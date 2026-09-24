@@ -1,4 +1,4 @@
-//! The server behind grund.run.
+//! The server behind grund.sh.
 //!
 //! ```text
 //!   request ─► trace ─► security headers ─► panic guard ─► timeout

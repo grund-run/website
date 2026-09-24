@@ -7,25 +7,25 @@ use clap::Parser;
 #[command(
     name = "grund-website",
     version,
-    about = "Serves grund.run: a static site embedded at build time"
+    about = "Serves grund.sh: a static site embedded at build time"
 )]
 pub struct Config {
     /// Where the HTTP server binds. The image sets 0.0.0.0:8080.
     #[arg(long, env = "GRUND_WEBSITE_LISTEN", default_value = "127.0.0.1:8080")]
     pub listen: SocketAddr,
 
-    /// The one origin the site is served from, e.g. https://grund.run. Alias
+    /// The one origin the site is served from, e.g. https://grund.sh. Alias
     /// hosts redirect here. An https origin with no path or trailing slash;
     /// plain http is accepted only for loopback, for local runs.
     #[arg(
         long,
         env = "GRUND_WEBSITE_CANONICAL_ORIGIN",
-        default_value = "https://grund.run"
+        default_value = "https://grund.sh"
     )]
     pub canonical_origin: String,
 
     /// Hosts that answer every request with a 308 to the canonical origin,
-    /// keeping path and query (e.g. www.grund.run). Comma-separated. Hosts not
+    /// keeping path and query (e.g. www.grund.sh). Comma-separated. Hosts not
     /// listed here are served normally, so kubelet probes and port-forwards,
     /// which send a pod IP as Host, keep working.
     #[arg(
@@ -120,7 +120,7 @@ impl Config {
     }
 }
 
-/// The lowercased host of an origin like `https://grund.run` or
+/// The lowercased host of an origin like `https://grund.sh` or
 /// `http://127.0.0.1:8080`, or `None` when it is not such an origin.
 fn origin_host(origin: &str) -> Option<String> {
     let (scheme, authority) = origin.split_once("://")?;
@@ -186,24 +186,24 @@ mod tests {
     #[test]
     fn defaults_are_a_valid_configuration_for_grund_run() {
         let config = parse(&[]).unwrap();
-        assert_eq!(config.canonical_host(), "grund.run");
+        assert_eq!(config.canonical_host(), "grund.sh");
         assert!(config.redirect_hosts.is_empty());
         assert_eq!(config.hsts_max_age, 0);
     }
 
     #[test]
     fn redirect_hosts_are_split_trimmed_and_lowercased() {
-        let config = parse(&["--redirect-hosts", "WWW.grund.run, grund.dev"]).unwrap();
-        assert_eq!(config.redirect_hosts, ["www.grund.run", "grund.dev"]);
+        let config = parse(&["--redirect-hosts", "WWW.grund.sh, grund.dev"]).unwrap();
+        assert_eq!(config.redirect_hosts, ["www.grund.sh", "grund.dev"]);
     }
 
     #[test]
     fn a_canonical_origin_with_a_path_or_trailing_slash_is_refused() {
         for origin in [
-            "https://grund.run/",
-            "https://grund.run/home",
-            "grund.run",
-            "ftp://grund.run",
+            "https://grund.sh/",
+            "https://grund.sh/home",
+            "grund.sh",
+            "ftp://grund.sh",
         ] {
             let error = parse(&["--canonical-origin", origin])
                 .unwrap_err()
@@ -218,12 +218,12 @@ mod tests {
     #[test]
     fn plain_http_is_accepted_only_for_loopback() {
         assert!(parse(&["--canonical-origin", "http://127.0.0.1:8080"]).is_ok());
-        assert!(parse(&["--canonical-origin", "http://grund.run"]).is_err());
+        assert!(parse(&["--canonical-origin", "http://grund.sh"]).is_err());
     }
 
     #[test]
     fn redirecting_the_canonical_host_to_itself_is_refused() {
-        let error = parse(&["--redirect-hosts", "grund.run"])
+        let error = parse(&["--redirect-hosts", "grund.sh"])
             .unwrap_err()
             .to_string();
         assert!(error.contains("GRUND_WEBSITE_REDIRECT_HOSTS"), "{error}");
@@ -231,8 +231,8 @@ mod tests {
 
     #[test]
     fn a_redirect_host_with_a_scheme_or_path_is_refused() {
-        assert!(parse(&["--redirect-hosts", "https://www.grund.run"]).is_err());
-        assert!(parse(&["--redirect-hosts", "www.grund.run/x"]).is_err());
+        assert!(parse(&["--redirect-hosts", "https://www.grund.sh"]).is_err());
+        assert!(parse(&["--redirect-hosts", "www.grund.sh/x"]).is_err());
     }
 
     #[test]
@@ -242,6 +242,6 @@ mod tests {
 
     #[test]
     fn an_unknown_flag_is_an_error_not_a_server() {
-        assert!(parse(&["--canonical-orign", "https://grund.run"]).is_err());
+        assert!(parse(&["--canonical-orign", "https://grund.sh"]).is_err());
     }
 }

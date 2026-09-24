@@ -22,7 +22,7 @@ pub struct Origin {
 }
 
 impl Origin {
-    /// `http://127.0.0.1:8080` or `https://grund.run`. No path.
+    /// `http://127.0.0.1:8080` or `https://grund.sh`. No path.
     pub fn parse(url: &str) -> anyhow::Result<Self> {
         let url = url.trim_end_matches('/');
         let (tls, rest) = if let Some(rest) = url.strip_prefix("https://") {

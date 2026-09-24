@@ -37,10 +37,10 @@ steps:
       # Stage the binary first and run the staged file, so the process the
       # accepttests assert against is byte for byte the one that gets packaged.
       - mkdir -p .image && cp target/release/grund-website .image/grund-website
-      - GRUND_WEBSITE_LISTEN=127.0.0.1:8080 GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.run ./.image/grund-website > server.log 2>&1 &
+      - GRUND_WEBSITE_LISTEN=127.0.0.1:8080 GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.sh ./.image/grund-website > server.log 2>&1 &
       # Assert against the real binary, not a mock of it: the same accepttests
       # that `cargo test` runs against a spawned binary, pointed at this one.
-      - GRUND_WEBSITE_ACCEPT_URL=http://127.0.0.1:8080 GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.run cargo test --locked --release --test tests || { echo "--- server log"; cat server.log; exit 1; }
+      - GRUND_WEBSITE_ACCEPT_URL=http://127.0.0.1:8080 GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.sh cargo test --locked --release --test tests || { echo "--- server log"; cat server.log; exit 1; }
 
   # A broken Dockerfile fails the pull request that broke it, not the next
   # push to main. Builds, never pushes, and needs no secret.

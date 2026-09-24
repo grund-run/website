@@ -7,12 +7,12 @@
 //! live origin:
 //!
 //! ```text
-//! GRUND_WEBSITE_ACCEPT_URL=https://dev.grund.run \
-//! GRUND_WEBSITE_ACCEPT_CANONICAL_ORIGIN=https://dev.grund.run \
+//! GRUND_WEBSITE_ACCEPT_URL=https://dev.grund.sh \
+//! GRUND_WEBSITE_ACCEPT_CANONICAL_ORIGIN=https://dev.grund.sh \
 //! GRUND_WEBSITE_ACCEPT_NOINDEX=true cargo test --test tests
 //!
-//! GRUND_WEBSITE_ACCEPT_URL=https://grund.run \
-//! GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.run cargo test --test tests
+//! GRUND_WEBSITE_ACCEPT_URL=https://grund.sh \
+//! GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.sh cargo test --test tests
 //! ```
 //!
 //! Against an https target the redirect host is requested by name, which also
@@ -54,10 +54,10 @@ impl Drop for Fixture {
 }
 
 /// The configuration a spawned binary gets unless a test adds to it: the prod
-/// shape, with www.grund.run as an alias of https://grund.run.
+/// shape, with www.grund.sh as an alias of https://grund.sh.
 const SPAWN_DEFAULTS: &[(&str, &str)] = &[
-    ("GRUND_WEBSITE_CANONICAL_ORIGIN", "https://grund.run"),
-    ("GRUND_WEBSITE_REDIRECT_HOSTS", "www.grund.run"),
+    ("GRUND_WEBSITE_CANONICAL_ORIGIN", "https://grund.sh"),
+    ("GRUND_WEBSITE_REDIRECT_HOSTS", "www.grund.sh"),
     ("GRUND_WEBSITE_NOINDEX", "false"),
 ];
 
@@ -81,7 +81,7 @@ impl Fixture {
             origin: Origin::parse(url)?,
             expect: Expectations {
                 canonical_origin: env("GRUND_WEBSITE_ACCEPT_CANONICAL_ORIGIN")
-                    .unwrap_or_else(|| "https://grund.run".into()),
+                    .unwrap_or_else(|| "https://grund.sh".into()),
                 redirect_host: env("GRUND_WEBSITE_ACCEPT_REDIRECT_HOST"),
                 noindex: env("GRUND_WEBSITE_ACCEPT_NOINDEX").is_some_and(|v| v == "true"),
             },

@@ -96,7 +96,7 @@ impl Site {
     /// Maps a raw (still percent-encoded) request path to an entry.
     ///
     /// `/` and `/dir/` serve `index.html` / `dir/index.html`; `/page` serves
-    /// `page` or `page.html`; `/dir` redirects to `/dir/` when only
+    /// `page`, `page.html` or `page.sh`; `/dir` redirects to `/dir/` when only
     /// `dir/index.html` exists.
     pub fn resolve(&self, raw_path: &str) -> Resolution {
         let Some(key) = normalise(raw_path) else {
@@ -112,6 +112,11 @@ impl Site {
             return Resolution::Found(entry);
         }
         if let Some(entry) = self.get(&format!("{key}.html")) {
+            return Resolution::Found(entry);
+        }
+        // `/install` serves `install.sh`, so the one-line install stays short:
+        // `curl -fsSL grund.sh/install | sh`.
+        if let Some(entry) = self.get(&format!("{key}.sh")) {
             return Resolution::Found(entry);
         }
         if self.get(&format!("{key}/index.html")).is_some() {
@@ -510,10 +515,17 @@ pub(crate) mod tests {
         );
     }
 
-    /// `curl -fsSL https://grund.run/install.sh | sh -s -- --domain …` must be
+    /// `curl -fsSL grund.sh/install | sh -s -- --domain …` must be
     /// harmless until grund is released: it says so, exits non-zero, and
     /// leaves the directory it runs in untouched. Runs the embedded bytes the
     /// way the pipe does, on stdin.
+    #[test]
+    fn the_short_install_path_serves_the_install_script() {
+        let site = Site::embedded();
+        assert_eq!(path_of(site.resolve("/install")), Some("install.sh"));
+        assert_eq!(path_of(site.resolve("/install.sh")), Some("install.sh"));
+    }
+
     #[test]
     fn the_install_script_changes_nothing_until_grund_is_released() {
         use std::io::Write;

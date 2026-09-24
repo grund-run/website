@@ -1,6 +1,6 @@
-# grund.run
+# grund.sh
 
-The server behind [grund.run](https://grund.run). It serves a static site that
+The server behind [grund.sh](https://grund.sh), grund's main site. It serves a static site that
 is built elsewhere and embedded into one static binary at compile time. The
 binary runs on a `scratch` image with no filesystem, no database and no
 outbound connections.
@@ -23,7 +23,7 @@ Configuration is flags or environment variables. There are no config files.
 | Env var | Default | What |
 |---|---|---|
 | `GRUND_WEBSITE_LISTEN` | `127.0.0.1:8080` | Bind address. The image sets `0.0.0.0:8080` |
-| `GRUND_WEBSITE_CANONICAL_ORIGIN` | `https://grund.run` | The one origin; alias hosts redirect here |
+| `GRUND_WEBSITE_CANONICAL_ORIGIN` | `https://grund.sh` | The one origin; alias hosts redirect here |
 | `GRUND_WEBSITE_REDIRECT_HOSTS` | empty | Comma-separated hosts that 308 to the canonical origin |
 | `GRUND_WEBSITE_NOINDEX` | `false` | Send `X-Robots-Tag: noindex` (dev) |
 | `GRUND_WEBSITE_HSTS_MAX_AGE` | `0` (off) | HSTS max-age in seconds |
@@ -71,13 +71,13 @@ any running instance instead:
 
 ```bash
 # local: the redirect host is sent as the Host header
-GRUND_WEBSITE_ACCEPT_URL=http://127.0.0.1:8080 GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.run \
+GRUND_WEBSITE_ACCEPT_URL=http://127.0.0.1:8080 GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.sh \
   cargo test --test tests
 # live dev
-GRUND_WEBSITE_ACCEPT_URL=https://dev.grund.run GRUND_WEBSITE_ACCEPT_CANONICAL_ORIGIN=https://dev.grund.run \
+GRUND_WEBSITE_ACCEPT_URL=https://dev.grund.sh GRUND_WEBSITE_ACCEPT_CANONICAL_ORIGIN=https://dev.grund.sh \
   GRUND_WEBSITE_ACCEPT_NOINDEX=true cargo test --test tests
 # live prod: www is requested by name, so its DNS, route and certificate are proven too
-GRUND_WEBSITE_ACCEPT_URL=https://grund.run GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.run \
+GRUND_WEBSITE_ACCEPT_URL=https://grund.sh GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=grund.run \
   cargo test --test tests
 ```
 
@@ -106,8 +106,8 @@ the existing homelab clusters, via `kjuulh/kubernetes-app`:
 
 | Env | Host | Replicas | Notes |
 |---|---|---|---|
-| dev | `dev.grund.run` | 1 | `noindex` |
-| prod | `grund.run` (+ `www.grund.run`, see CLAUDE.md open items) | 2 | `www` redirects to the apex |
+| dev | `dev.grund.sh` (+ `dev.grund.run`, redirected) | 1 | `noindex` |
+| prod | `grund.sh` (+ `www.grund.sh`, `grund.run`, `www.grund.run`, redirected) | 2 | grund.run becomes the apps domain (`design/app-domains.md`) |
 
 ## Getting traffic here
 
