@@ -1,6 +1,6 @@
 # Requirements record: grund.run server
 
-Status: placeholder site live in code; the designed site is not yet dropped in.
+Status: first designed version of the page in `site/`, hand-written, no build step.
 This file records what the server guarantees, the contract the designed site
 must meet, and what is deliberately not done. How to run it is in
 [README.md](README.md).
@@ -34,7 +34,12 @@ must meet, and what is deliberately not done. How to run it is in
    webmanifest, txt, xml, svg, png, jpg, jpeg, gif, webp, avif, ico, woff2,
    woff, wasm, pdf, mp4, webm). An unknown extension fails the build; add it to
    `content_type` in `build.rs` deliberately.
-8. **It must run under the CSP.** Everything is loaded from this origin. That
+8. **Hand-written today.** Files that change (`styles.css`) live outside
+   `assets/`, so editing them needs no renaming; they revalidate by ETag.
+   Files that never change (the fonts) live in `assets/` under content-hashed
+   names. Every same-origin `href`, `src` and CSS `url()` must resolve, which
+   `cargo test` checks (`every_local_link_in_the_embedded_site_resolves`).
+9. **It must run under the CSP.** Everything is loaded from this origin. That
    means no inline `<script>` (JSON data blocks excepted), no inline `<style>`
    or `style=` attributes, no `on*=` handlers, and no third-party fonts,
    scripts, analytics or embeds. `cargo test` scans every embedded HTML file for
@@ -92,11 +97,13 @@ must meet, and what is deliberately not done. How to run it is in
   server never compresses on the request path.
 - **No 406.** A client refusing identity still gets identity, which RFC 9110
   permits.
+- **No third-party fonts, scripts or analytics.** Inter and JetBrains Mono are
+  self-hosted (SIL OFL 1.1, licenses served under `/licenses/`).
 - **No CA bundle in the image.** The server makes no outbound connections.
 
 ## Verification
 
-- `cargo test --locked`: 41 unit tests, and 16 accepttests
+- `cargo test --locked`: 42 unit tests, and 16 accepttests
   (`tests/accepttest/`) against a spawned binary. The accepttests take
   `GRUND_WEBSITE_ACCEPT_URL` to run against the image or a live origin instead.
 - The two records below were made with `ci/assert-http.sh` (62 checks), the

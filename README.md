@@ -5,9 +5,11 @@ is built elsewhere and embedded into one static binary at compile time. The
 binary runs on a `scratch` image with no filesystem, no database and no
 outbound connections.
 
-The site in `site/` today is a placeholder. The design is being done
-separately. [REQUIREMENTS.md](REQUIREMENTS.md) states the contract the designed
-site has to meet to drop in, and what the server guarantees.
+`site/` holds the first designed version of the page. It is hand-written HTML
+and CSS in the visual language of the grund dashboard design
+(`design/reference/dashboard-overview.png`), with self-hosted Inter and
+JetBrains Mono. [REQUIREMENTS.md](REQUIREMENTS.md) states the contract any
+version of the site has to meet, and what the server guarantees.
 
 ## Run it
 
@@ -41,7 +43,8 @@ Endpoints:
 
 ```
 build.rs              walks site/, hashes and precompresses every file, emits the table
-site/                 the static site (placeholder today); the drop-in point
+site/                 the static site: index.html, 404.html, styles.css, favicon.svg, assets/ (fonts), licenses/
+design/reference/     the design the site follows
 src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
 src/site.rs           the embedded table: path resolution, encoding negotiation, cache policy
@@ -58,7 +61,7 @@ Dockerfile.prebuilt   scratch image around the prebuilt binary
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked                 # 41 unit tests + 16 accepttests against a spawned binary
+cargo test --locked                 # 42 unit tests + 16 accepttests against a spawned binary
 ./check.sh                          # the above, plus the accepttests against the static binary in a read-only scratch container
 ```
 

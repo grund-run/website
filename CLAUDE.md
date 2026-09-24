@@ -65,6 +65,17 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
   `revision` must equal the commit. Then run the accepttests against it
   (README.md "Verify").
 
+## Editing the site
+
+- The palette and type come from `design/reference/dashboard-overview.png`,
+  and the colour tokens are at the top of `site/styles.css`. Keep the page and
+  the product looking like one thing.
+- Copy must not present planned guarantees as shipped. The evidence examples
+  are labelled as examples.
+- Look at it in a real browser with the real server, so the CSP applies:
+  `cargo run`, then headless Chrome with `--screenshot` at 1440 px and 390 px
+  wide. `google-chrome-stable` is on this machine.
+
 ## Gotchas
 
 - **`build.rs` panics on purpose** when `site/` lacks `index.html` or
@@ -82,7 +93,10 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 ## Open items
 
-- The designed site (separate work). It drops into `site/` per REQUIREMENTS.md.
+- The page is a first version: the copy is drafted from the platform plan and
+  says plainly that grund is in development. The dashboard illustration is
+  HTML and CSS, not the PNG. Pricing is deliberately absent (still an
+  estimate). The CTA is GitHub, because there is no signup backend.
 - **www.grund.run has no Ingress or certificate yet.** `kubernetes-app`
   0.1.12 renders a single `host`. The server already redirects www
   (`GRUND_WEBSITE_REDIRECT_HOSTS`). What is missing is a component field for
