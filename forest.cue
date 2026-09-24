@@ -111,7 +111,14 @@ kjuulh: "kubernetes-app": {
 // Generates .woodpecker/rollout.yaml (`forest run install`). The manual
 // production job is off: production promotion belongs to Kasper, through
 // forest, never to CI.
+//
+// The forest instance is forest.kjuulh.io. `server` is its gRPC API endpoint,
+// api.forest.kjuulh.io: the web host forest.kjuulh.io answers gRPC calls
+// with an HTML 404 (checked 2026-09-24). Pinned here rather than inherited from
+// the component default, so that a change of default cannot move releases to
+// another instance.
 kjuulh: "woodpecker-forest": config: {
+	server:          "https://api.forest.kjuulh.io"
 	artifact_image:  "git.kjuulh.io/grund/website"
 	manual_prod_job: false
 }

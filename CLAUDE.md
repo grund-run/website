@@ -30,15 +30,19 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 - Push to main. CI publishes `git.kjuulh.io/grund/website:main-<sha>`, and
   `rollout.yaml` stages a forest release (project `kjuulh/grund-website`).
-  Forest triggers roll it to dev.
+  Forest triggers roll it to dev. The project has one trigger, `main-to-dev`
+  (branch `^main$`, environment `dev` only). There is no prod trigger.
 - **Never promote to prod from here** (`forest release release/approve`
   against prod). That is Kasper's call.
 - `rollout.yaml` is generated. After changing the `woodpecker-forest` block in
   `forest.cue`, run `forest run install` and commit what it writes. Do not
   edit the file by hand.
-- Use `--context kjuulh-prod` (or `FOREST_CONTEXT=kjuulh-prod`) on every forest
-  command. The default context on this machine may point at another
-  instance.
+- **The forest instance is forest.kjuulh.io** (web UI at
+  https://forest.kjuulh.io). The CLI and CI talk to its gRPC endpoint,
+  `https://api.forest.kjuulh.io`. The web host itself returns an HTML 404 to
+  gRPC. On this machine that instance is the `kjuulh-prod` context. Pass
+  `--context kjuulh-prod` (or `FOREST_CONTEXT=kjuulh-prod`) on every command,
+  because the default context points at a different forest instance.
 - `forest validate` reports "Validated 0 component(s)", as it does for
   tiny-web. To check the config against `kubernetes-app`'s `#Spec`, run
   `cue vet` against the component's `forest.component.cue`.

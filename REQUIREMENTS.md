@@ -101,3 +101,10 @@ must meet, and what is deliberately not done. How to run it is in
 - Verified 2026-09-24 against the release binary (`cargo build --release`,
   glibc host) and, via `./check.sh`, against the static musl binary from
   `rust:1.98-alpine` in a read-only scratch container. 62/62 both times.
+- Verified 2026-09-24 against dev on clank-dev (pod from image
+  `git.kjuulh.io/grund/website:main-2c3562dadf25c7a4ca6bdbacb5b2c34d13f3e49b`,
+  through `kubectl port-forward`): `/health/ready` reported `revision`
+  `2c3562dadf25c7a4ca6bdbacb5b2c34d13f3e49b` and the same `site_digest` as the
+  local build, and `EXPECT_NOINDEX=1 ci/assert-http.sh` passed 59/59. **Not
+  established:** the public origin https://dev.grund.run. It has no DNS
+  record, gateway route or certificate yet.
