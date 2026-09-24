@@ -1115,6 +1115,35 @@ h2 .dim {
   }
 }
 
+.self-band {
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+}
+
+.self-hosted {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.15rem 1.4rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.self-hosted .icon {
+  margin-top: 0.15rem;
+  color: var(--accent);
+}
+
+.self-hosted p {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.self-hosted strong {
+  color: var(--text);
+}
+
 .machine-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
