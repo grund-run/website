@@ -5,8 +5,8 @@ is built elsewhere and embedded into one static binary at compile time. The
 binary runs on a `scratch` image with no filesystem, no database and no
 outbound connections.
 
-`site/` holds the first designed version of the page. It is hand-written HTML
-and CSS in the visual language of the grund dashboard design
+`site/` holds the designed page: a feature page, hand-written in HTML and CSS
+in the palette of the grund dashboard design
 (`design/reference/dashboard-overview.png`), with self-hosted Inter and
 JetBrains Mono. [REQUIREMENTS.md](REQUIREMENTS.md) states the contract any
 version of the site has to meet, and what the server guarantees.

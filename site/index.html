@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>grund · The boring production layer for your own servers</title>
-<meta name="description" content="grund is a self-hosted production platform for 2 to 10 dedicated servers: Kubernetes' guarantees with compose's effort, and evidence for every guarantee. In development.">
+<title>grund · Production on your own servers</title>
+<meta name="description" content="grund turns two to ten dedicated servers into a production platform: databases you can restore to any second, deploys that roll back on their own, and evidence that all of it works. In development.">
 <meta name="theme-color" content="#141c18">
-<meta property="og:title" content="grund · The boring production layer for your own servers">
-<meta property="og:description" content="Kubernetes' guarantees with compose's effort, on your own servers. Every guarantee comes with evidence.">
+<meta property="og:title" content="grund · Production on your own servers">
+<meta property="og:description" content="Databases you can restore to any second, deploys that roll back on their own, and evidence that all of it works. On servers you own.">
 <meta property="og:url" content="https://grund.run/">
 <meta property="og:type" content="website">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -15,235 +15,235 @@
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+<svg class="sprite" aria-hidden="true">
+  <symbol id="mark" viewBox="7 6 38 29"><path fill="currentColor" d="M20 20.5v-9A4.5 4.5 0 0 1 24.5 7h18a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-10v3.5z"/><rect fill="currentColor" x="8" y="23" width="36" height="11" rx="2"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="m7.5 12.5 3 3 6-6.5" stroke="#0e1710" stroke-width="2.5"/></symbol>
+  <symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M12 7v6M12 16.5v.5" stroke="#0e1710" stroke-width="2.5"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v5h5"/></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8v8"/><path d="M18 10.5c0 4-6 3-11 6"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 6.5a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+</svg>
+
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="/" aria-label="grund, home">
-      <svg class="mark" viewBox="7 6 38 29" aria-hidden="true"><path fill="currentColor" d="M20 20.5v-9A4.5 4.5 0 0 1 24.5 7h18a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-10v3.5z"/><rect fill="currentColor" x="8" y="23" width="36" height="11" rx="2"/></svg>
-      <span>grund</span>
-    </a>
+    <a class="brand" href="/" aria-label="grund, home"><svg class="mark" aria-hidden="true"><use href="#mark"/></svg><span>grund</span></a>
     <nav class="nav" aria-label="Primary">
-      <a href="#guarantees">Guarantees</a>
-      <a href="#ownership">Your servers</a>
-      <a href="#who">Who it's for</a>
-      <a class="nav-gh" href="https://github.com/grund-run">
-        <svg class="icon solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></svg>
-        GitHub
-      </a>
+      <a href="#evidence">Evidence</a>
+      <a href="#deploys">Deploys</a>
+      <a href="#ownership">Ownership</a>
+      <a href="#steps">How it works</a>
+      <a class="nav-gh" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
     </nav>
   </div>
 </header>
 
 <main id="main">
+
   <section class="hero">
-    <div class="wrap">
+    <svg class="strata" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs><linearGradient id="strata-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8dab3" stop-opacity="0"/><stop offset=".55" stop-color="#b8dab3" stop-opacity=".07"/><stop offset="1" stop-color="#b8dab3" stop-opacity=".16"/></linearGradient><radialGradient id="strata-glow" cx=".72" cy=".62" r=".55"><stop offset="0" stop-color="#b8dab3" stop-opacity=".18"/><stop offset="1" stop-color="#b8dab3" stop-opacity="0"/></radialGradient></defs><rect width="1440" height="640" fill="url(#strata-glow)"/><path d="M0 270.9 C80 270.9 80 272.5 160 272.5 C240 272.5 240 255.9 320 255.9 C400 255.9 400 254.6 480 254.6 C560 254.6 560 232.1 640 232.1 C720 232.1 720 220.4 800 220.4 C880 220.4 880 251.4 960 251.4 C1040 251.4 1040 264.7 1120 264.7 C1200 264.7 1200 262.5 1280 262.5 C1360 262.5 1360 271.7 1440 271.7" fill="none" stroke="#b8dab3" stroke-opacity="0.05" stroke-width="1"/><path d="M0 309.5 C80 309.5 80 297.1 160 297.1 C240 297.1 240 282.7 320 282.7 C400 282.7 400 279.1 480 279.1 C560 279.1 560 252.3 640 252.3 C720 252.3 720 251.4 800 251.4 C880 251.4 880 287.7 960 287.7 C1040 287.7 1040 295.9 1120 295.9 C1200 295.9 1200 293.5 1280 293.5 C1360 293.5 1360 300.7 1440 300.7" fill="none" stroke="#b8dab3" stroke-opacity="0.06" stroke-width="1"/><path d="M0 344.6 C80 344.6 80 321.3 160 321.3 C240 321.3 240 311.4 320 311.4 C400 311.4 400 303.2 480 303.2 C560 303.2 560 275.6 640 275.6 C720 275.6 720 287.6 800 287.6 C880 287.6 880 326.1 960 326.1 C1040 326.1 1040 328.3 1120 328.3 C1200 328.3 1200 326.0 1280 326.0 C1360 326.0 1360 330.4 1440 330.4" fill="none" stroke="#b8dab3" stroke-opacity="0.07" stroke-width="1"/><path d="M0 374.9 C80 374.9 80 346.6 160 346.6 C240 346.6 240 341.6 320 341.6 C400 341.6 400 327.0 480 327.0 C560 327.0 560 303.2 640 303.2 C720 303.2 720 328.8 800 328.8 C880 328.8 880 365.9 960 365.9 C1040 365.9 1040 361.7 1120 361.7 C1200 361.7 1200 359.8 1280 359.8 C1360 359.8 1360 360.7 1440 360.7" fill="none" stroke="#b8dab3" stroke-opacity="0.09" stroke-width="1"/><path d="M0 400.9 C80 400.9 80 374.5 160 374.5 C240 374.5 240 372.4 320 372.4 C400 372.4 400 351.5 480 351.5 C560 351.5 560 336.6 640 336.6 C720 336.6 720 374.4 800 374.4 C880 374.4 880 406.3 960 406.3 C1040 406.3 1040 396.2 1120 396.2 C1200 396.2 1200 394.9 1280 394.9 C1360 394.9 1360 391.6 1440 391.6" fill="none" stroke="#b8dab3" stroke-opacity="0.10" stroke-width="1"/><path d="M0 424.8 C80 424.8 80 405.8 160 405.8 C240 405.8 240 403.2 320 403.2 C400 403.2 400 378.2 480 378.2 C560 378.2 560 376.5 640 376.5 C720 376.5 720 423.4 800 423.4 C880 423.4 880 446.9 960 446.9 C1040 446.9 1040 431.7 1120 431.7 C1200 431.7 1200 431.1 1280 431.1 C1360 431.1 1360 423.1 1440 423.1" fill="none" stroke="#b8dab3" stroke-opacity="0.12" stroke-width="1"/><path d="M0 449.7 C80 449.7 80 440.3 160 440.3 C240 440.3 240 433.8 320 433.8 C400 433.8 400 408.8 480 408.8 C560 408.8 560 423.3 640 423.3 C720 423.3 720 474.6 800 474.6 C880 474.6 880 487.2 960 487.2 C1040 487.2 1040 468.3 1120 468.3 C1200 468.3 1200 468.3 1280 468.3 C1360 468.3 1360 455.2 1440 455.2" fill="none" stroke="#b8dab3" stroke-opacity="0.14" stroke-width="1"/><path d="M0 478.5 C80 478.5 80 477.1 160 477.1 C240 477.1 240 464.5 320 464.5 C400 464.5 400 445.4 480 445.4 C560 445.4 560 476.5 640 476.5 C720 476.5 720 526.6 800 526.6 C880 526.6 880 527.0 960 527.0 C1040 527.0 1040 506.0 1120 506.0 C1200 506.0 1200 506.3 1280 506.3 C1360 506.3 1360 488.1 1440 488.1" fill="none" stroke="#b8dab3" stroke-opacity="0.17" stroke-width="1"/><path d="M0 512.9 C80 512.9 80 514.9 160 514.9 C240 514.9 240 496.8 320 496.8 C400 496.8 400 489.5 480 489.5 C560 489.5 560 535.0 640 535.0 C720 535.0 720 578.1 800 578.1 C880 578.1 880 566.2 960 566.2 C1040 566.2 1040 544.9 1120 544.9 C1200 544.9 1200 545.0 1280 545.0 C1360 545.0 1360 522.0 1440 522.0 L1440 640 L0 640 Z" fill="url(#strata-fade)"/><path d="M0 512.9 C80 512.9 80 514.9 160 514.9 C240 514.9 240 496.8 320 496.8 C400 496.8 400 489.5 480 489.5 C560 489.5 560 535.0 640 535.0 C720 535.0 720 578.1 800 578.1 C880 578.1 880 566.2 960 566.2 C1040 566.2 1040 544.9 1120 544.9 C1200 544.9 1200 545.0 1280 545.0 C1360 545.0 1360 522.0 1440 522.0" fill="none" stroke="#b8dab3" stroke-opacity=".75" stroke-width="1.5"/><path d="M0 552.7 C80 552.7 80 552.8 160 552.8 C240 552.8 240 532.9 320 532.9 C400 532.9 400 542.0 480 542.0 C560 542.0 560 597.0 640 597.0 C720 597.0 720 627.8 800 627.8 C880 627.8 880 605.1 960 605.1 C1040 605.1 1040 585.2 1120 585.2 C1200 585.2 1200 584.5 1280 584.5 C1360 584.5 1360 557.1 1440 557.1" fill="none" stroke="#b8dab3" stroke-opacity="0.22" stroke-width="1"/><path d="M0 596.6 C80 596.6 80 591.0 160 591.0 C240 591.0 240 575.2 320 575.2 C400 575.2 400 602.6 480 602.6 C560 602.6 560 660.2 640 660.2 C720 660.2 720 675.2 800 675.2 C880 675.2 880 643.9 960 643.9 C1040 643.9 1040 626.8 1120 626.8 C1200 626.8 1200 624.7 1280 624.7 C1360 624.7 1360 593.6 1440 593.6" fill="none" stroke="#b8dab3" stroke-opacity="0.24" stroke-width="1"/><path d="M0 642.2 C80 642.2 80 630.7 160 630.7 C240 630.7 240 626.0 320 626.0 C400 626.0 400 670.1 480 670.1 C560 670.1 560 722.5 640 722.5 C720 722.5 720 719.7 800 719.7 C880 719.7 880 683.3 960 683.3 C1040 683.3 1040 669.9 1120 669.9 C1200 669.9 1200 665.8 1280 665.8 C1360 665.8 1360 632.0 1440 632.0" fill="none" stroke="#b8dab3" stroke-opacity="0.27" stroke-width="1"/><path d="M0 688.2 C80 688.2 80 674.7 160 674.7 C240 674.7 240 686.4 320 686.4 C400 686.4 400 741.9 480 741.9 C560 741.9 560 781.6 640 781.6 C720 781.6 720 761.6 800 761.6 C880 761.6 880 723.7 960 723.7 C1040 723.7 1040 714.4 1120 714.4 C1200 714.4 1200 707.7 1280 707.7 C1360 707.7 1360 672.4 1440 672.4" fill="none" stroke="#b8dab3" stroke-opacity="0.30" stroke-width="1"/><path d="M0 734.4 C80 734.4 80 725.8 160 725.8 C240 725.8 240 756.1 320 756.1 C400 756.1 400 814.9 480 814.9 C560 814.9 560 836.1 640 836.1 C720 836.1 720 801.6 800 801.6 C880 801.6 880 765.7 960 765.7 C1040 765.7 1040 760.5 1120 760.5 C1200 760.5 1200 750.9 1280 750.9 C1360 750.9 1360 715.4 1440 715.4" fill="none" stroke="#b8dab3" stroke-opacity="0.33" stroke-width="1"/></svg>
+    <div class="wrap hero-inner">
       <p class="pill"><span class="dot"></span> In development. Not yet available.</p>
-      <h1>The boring production layer for your own servers.</h1>
-      <p class="lede">Kubernetes' guarantees with compose's effort, on two to ten dedicated servers. Every guarantee comes with evidence, and if we ever disappear, you keep a standard cluster with its manifests in your own git.</p>
+      <h1>Production on your own&nbsp;servers.</h1>
+      <p class="lede">grund turns two to ten dedicated servers into a production platform. Databases you can restore to any second, deploys that roll back on their own, and evidence that all of it works. If we ever disappear, you keep a standard cluster in your own git.</p>
       <div class="actions">
-        <a class="button" href="https://github.com/grund-run">
-          <svg class="icon solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></svg>
-          Follow the build on GitHub
-        </a>
-        <a class="more" href="#guarantees">See the guarantees <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="button" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Follow the build</a>
+        <a class="button ghost" href="#steps">How it works</a>
       </div>
     </div>
   </section>
 
-  <figure class="preview">
+  <section class="facts">
     <div class="wrap">
-      <div class="window" aria-hidden="true">
-        <div class="w-side">
-          <div class="brand">
-            <svg class="mark" viewBox="7 6 38 29"><path fill="currentColor" d="M20 20.5v-9A4.5 4.5 0 0 1 24.5 7h18a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-10v3.5z"/><rect fill="currentColor" x="8" y="23" width="36" height="11" rx="2"/></svg>
-            <span>grund</span>
-          </div>
-          <div class="w-nav is-active"><svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Overview</div>
-          <div class="w-nav"><svg class="icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Applications</div>
-          <div class="w-nav"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>Fleet</div>
-          <div class="w-nav"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg>Domains</div>
-          <div class="w-nav"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Activity</div>
-        </div>
-        <div class="w-main">
-          <div class="w-bar">
-            <div class="w-crumbs">Nord Studio <span class="sep">/</span> Production</div>
-            <svg class="icon w-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          </div>
-          <div class="w-body">
-            <div class="w-head">
-              <div>
-                <div class="w-title">Overview</div>
-                <div class="w-status"><svg class="ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>All applications are serving traffic.</div>
-              </div>
-              <div class="w-deploy"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Deploy application</div>
-            </div>
-            <div class="w-card">
-              <div class="spinner"></div>
-              <div class="grow">
-                <strong>Storefront is updating</strong>
-                <span class="sub">Checking the new release. Current version is serving traffic.</span>
-              </div>
-              <span class="w-link">View rollout <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-            </div>
-            <div class="w-section">
-              <h4>Applications <span>6</span></h4>
-              <span class="w-link">View all <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-            </div>
-            <ul class="w-apps">
-              <li class="w-app">
-                <svg class="icon c-orange" viewBox="0 0 24 24"><path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7z"/><path d="M3.5 7 12 11.5 20.5 7"/><path d="M12 11.5v10"/></svg>
-                <div><div class="name">Storefront</div><div class="host">shop.nord.example</div></div>
-                <span class="serving"><svg class="ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Serving</span>
-                <svg class="icon chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
-              </li>
-              <li class="w-app">
-                <svg class="icon solid c-blue" viewBox="0 0 24 24"><rect x="4" y="13" width="4" height="8" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg>
-                <div><div class="name">Plausible</div><div class="host">stats.nord.example</div></div>
-                <span class="serving"><svg class="ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Serving</span>
-                <svg class="icon chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
-              </li>
-              <li class="w-app">
-                <svg class="icon c-violet" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/><path d="m14 4-4 16"/></svg>
-                <div><div class="name">Customer API</div><div class="host">api.nord.example</div></div>
-                <span class="serving"><svg class="ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Serving</span>
-                <svg class="icon chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
-              </li>
-            </ul>
-            <div class="w-foot">
-              <span><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>3 servers online</span>
-              <span><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg>4 domains connected</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <figcaption>A design of the grund dashboard: three applications serving traffic while one rolls out. Illustrative data.</figcaption>
-    </div>
-  </figure>
-
-  <section class="section" id="guarantees">
-    <div class="wrap">
-      <p class="eyebrow">Guarantees</p>
-      <h2>Every guarantee comes with evidence.</h2>
-      <p class="section-lede">A promise you cannot check is a hope. grund shows the proof next to each one: when it was last tested, and what it measured.</p>
-      <ul class="rows">
-        <li class="row">
-          <svg class="icon c-blue" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
-          <div>
-            <h3>Restore your database to any second</h3>
-            <p>PostgreSQL with its write-ahead log archived off-site, not on the same servers. Every night a drill restores it into an isolated space and compares it.</p>
-          </div>
-          <div class="evidence"><span class="label">You will see</span><span class="proof"><svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Restore drill 03:12 · RPO 4 s · RTO 3 m 40 s</span></div>
-        </li>
-        <li class="row">
-          <svg class="icon c-orange" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>
-          <div>
-            <h3>Losing a server doesn't lose the product</h3>
-            <p>Three servers in quorum, replicas spread across them, and disruption budgets. An opt-in drill drains a server and measures how long recovery takes.</p>
-          </div>
-          <div class="evidence"><span class="label">You will see</span><span class="proof"><svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Can lose any 1 server · failover drill 2 days ago</span></div>
-        </li>
-        <li class="row">
-          <svg class="icon c-violet" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v5h5"/></svg>
-          <div>
-            <h3>Deploys never take you down, and roll back on their own</h3>
-            <p>Releases are promoted by image digest through readiness gates. When health checks fail, the previous release comes back without anyone paging you.</p>
-          </div>
-          <div class="evidence"><span class="label">You will see</span><span class="proof"><svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>sha256:7c1e… healthy in 41 s · one-click rollback</span></div>
-        </li>
-        <li class="row">
-          <svg class="icon c-blue" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 4-4 4 4"/><path d="M12 16V8"/></svg>
-          <div>
-            <h3>The platform's own upgrades are safe</h3>
-            <p>Versioned release channels. Every upgrade is rehearsed on our own clusters first, and an upgrade that fails its gates reverts itself.</p>
-          </div>
-          <div class="evidence"><span class="label">You will see</span><span class="proof"><svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Rehearsed on 6 clusters for 9 days</span></div>
-        </li>
-        <li class="row">
-          <svg class="icon c-orange" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
-          <div>
-            <h3>Our control plane cannot root your servers</h3>
-            <p>An agent on your cluster pulls signed intents and verifies them. The hosted control plane never holds SSH keys and never runs commands on your machines.</p>
-          </div>
-          <div class="evidence"><span class="label">You will see</span><span class="proof"><svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Signed intents only · no SSH keys held</span></div>
-        </li>
-        <li class="row">
-          <svg class="icon c-violet" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
-          <div>
-            <h3>You know before your users do</h3>
-            <p>Metrics and alert rules out of the box: certificate expiry, backup age, disk space and replication lag, routed to email or your phone.</p>
-          </div>
-          <div class="evidence"><span class="label">You will see</span><span class="proof"><svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>Backup 6 h old · cert 61 d left · disk 42 %</span></div>
-        </li>
+      <ul class="fact-grid">
+        <li><h3>Your servers, not ours.</h3><p>Two to ten dedicated machines you rent or own. No per-request markup, no surprise egress bill.</p></li>
+        <li><h3>Restores you can prove.</h3><p>Every night grund restores your database somewhere safe and checks it, so a backup is never just a hope.</p></li>
+        <li><h3>Deploys that undo themselves.</h3><p>A release that fails its health checks rolls back before your users notice, with nobody paged.</p></li>
+        <li><h3>Leave whenever you like.</h3><p>Everything is a standard cluster with manifests in your git. It keeps running without us.</p></li>
       </ul>
-      <p class="note">The evidence shown is an example of what grund will report. grund is being built; these are the guarantees it is designed around, not a list of shipped features.</p>
+    </div>
+  </section>
+
+  <section class="section split" id="evidence">
+    <div class="wrap split-grid">
+      <div>
+        <h2>Every guarantee <span class="dim">comes with evidence.</span></h2>
+        <p class="section-lede">A promise you cannot check is a hope. grund tests its own guarantees on a schedule and shows you what it measured.</p>
+        <dl class="labelled">
+          <div><dt>restore</dt><dd>Point-in-time restore of PostgreSQL, drilled nightly into an isolated space and compared row for row.</dd></div>
+          <div><dt>failover</dt><dd>Three servers in quorum. An opt-in drill drains one and measures how long recovery takes.</dd></div>
+          <div><dt>backups</dt><dd>Write-ahead log streamed off-site, never only on the servers it protects.</dd></div>
+          <div><dt>alerts</dt><dd>Certificate expiry, backup age, disk and replication lag, sent to email or your phone before users notice.</dd></div>
+        </dl>
+      </div>
+      <figure class="visual" aria-label="Example: a grund evidence panel showing passing restore and failover drills.">
+        <div class="panel">
+          <div class="panel-head"><span>Evidence</span><span class="muted">Production</span></div>
+          <ul class="checks">
+            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Restore drill</strong><span>Tonight 03:12 · restored to 02:47:19 · 1.2 M rows match</span></div><em>RTO 3 m 40 s</em></li>
+            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Failover drill</strong><span>2 days ago · drained srv-2 · traffic back in 38 s</span></div><em>any 1 server</em></li>
+            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Off-site backup</strong><span>Last WAL segment shipped 4 s ago</span></div><em>RPO 4 s</em></li>
+            <li><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Certificates</strong><span>6 domains valid · next renewal in 21 days</span></div><em>auto-renew</em></li>
+          </ul>
+          <div class="panel-foot"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>3 servers · can lose any 1</div>
+        </div>
+        <figcaption>Example evidence. grund is in development.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section centered" id="deploys">
+    <div class="wrap">
+      <h2>Deploys that roll back <span class="dim">on their own.</span></h2>
+      <p class="section-lede">Releases are promoted by image digest through readiness gates. When health checks fail, the last good release comes back in seconds.</p>
+      <figure class="visual wide" aria-label="Example: a release fails a health check at 10 percent of traffic and is rolled back automatically.">
+        <div class="panel rollout">
+          <div class="panel-head"><span>Storefront <span class="mono muted">sha256:7c1e…</span></span><span class="tag warn">Rolled back</span></div>
+          <ol class="timeline">
+            <li class="is-ok"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Image pinned by digest</strong><span class="mono">sha256:7c1e4f…</span></div><time>14:02:07</time></li>
+            <li class="is-ok"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Readiness gates passed</strong><span>3 of 3 replicas healthy</span></div><time>14:02:31</time></li>
+            <li class="is-fail"><svg class="st fail" aria-hidden="true"><use href="#i-fail"/></svg><div><strong>Health check failed at 10% of traffic</strong><span>p95 latency 2.1 s, budget 400 ms</span></div><time>14:03:12</time></li>
+            <li class="is-ok"><svg class="st ok" aria-hidden="true"><use href="#i-ok"/></svg><div><strong>Rolled back to the last good release</strong><span class="mono">sha256:a4f09b… · 9 s · nobody paged</span></div><time>14:03:21</time></li>
+          </ol>
+        </div>
+        <figcaption>Example rollout. grund is in development.</figcaption>
+      </figure>
     </div>
   </section>
 
   <section class="section" id="ownership">
     <div class="wrap">
-      <p class="eyebrow">Ownership</p>
-      <h2>Your servers. Your git. You can leave.</h2>
-      <p class="section-lede">grund automates a stack you could run yourself. Nothing about it depends on us staying around.</p>
-      <div class="cards">
-        <div class="card">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8v8"/><path d="M18 10.5c0 4-6 3-11 6"/></svg>
-          <h3>Everything lives in your git</h3>
-          <p>Desired state is rendered to plain manifests, committed to your repository and applied by Flux. Nothing exists only in our database.</p>
-        </div>
-        <div class="card">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
-          <h3>Losing us is survivable</h3>
-          <p>Export gives you a standard <code>k3s</code>, Flux and CloudNativePG setup that keeps running without grund. There is no proprietary runtime underneath.</p>
-        </div>
-        <div class="card">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4.5"/><path d="m11.2 11.8 8.3-8.3"/><path d="m16 7 2.5 2.5"/><path d="m18.5 4.5 2 2"/></svg>
-          <h3>Secrets stay with you</h3>
-          <p>Encrypted in your git and decrypted inside your cluster. They never sit in a tool's database, ours included.</p>
-        </div>
+      <div class="section-head">
+        <h2>Your servers. Your git. <span class="dim">You can leave.</span></h2>
+        <p class="section-lede">grund automates a stack you could run yourself. Nothing about it depends on us staying around.</p>
       </div>
+      <div class="cards">
+        <article class="card">
+          <div class="card-visual">
+            <div class="term">
+              <p><span class="prompt">$</span> kubectl get nodes</p>
+              <p class="muted">NAME&nbsp;&nbsp;&nbsp;STATUS&nbsp;&nbsp;ROLES</p>
+              <p>srv-1&nbsp;&nbsp;Ready&nbsp;&nbsp;&nbsp;control-plane</p>
+              <p>srv-2&nbsp;&nbsp;Ready&nbsp;&nbsp;&nbsp;control-plane</p>
+              <p>srv-3&nbsp;&nbsp;Ready&nbsp;&nbsp;&nbsp;control-plane</p>
+            </div>
+          </div>
+          <h3>A standard cluster underneath</h3>
+          <p>k3s, Flux and CloudNativePG. No proprietary runtime you cannot inspect.</p>
+        </article>
+        <article class="card">
+          <div class="card-visual">
+            <ul class="tree">
+              <li><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>clusters/production</li>
+              <li class="in"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>storefront.yaml</li>
+              <li class="in"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>postgres.yaml</li>
+              <li class="in"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>secrets.enc.yaml</li>
+            </ul>
+          </div>
+          <h3>Everything lives in your git</h3>
+          <p>Desired state is rendered to plain manifests in your repository and applied by Flux.</p>
+        </article>
+        <article class="card">
+          <div class="card-visual">
+            <div class="flow">
+              <span class="node">grund</span>
+              <span class="edge">signed intent</span>
+              <span class="node on">agent</span>
+            </div>
+            <p class="flow-note">No SSH keys, no remote commands</p>
+          </div>
+          <h3>Our control plane cannot root you</h3>
+          <p>An agent in your cluster pulls signed intents and verifies them. We never hold your keys.</p>
+        </article>
+        <article class="card">
+          <div class="card-visual">
+            <div class="term">
+              <p><span class="prompt">$</span> sops -d secrets.enc.yaml</p>
+              <p class="muted"># decrypted in your cluster,</p>
+              <p class="muted"># never in our database</p>
+            </div>
+          </div>
+          <h3>Secrets stay with you</h3>
+          <p>Encrypted in your git, decrypted inside your cluster. Never stored in a tool's database.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section centered" id="steps">
+    <div class="wrap">
+      <h2>From bare servers to production <span class="dim">in three steps.</span></h2>
+      <p class="section-lede">No platform team, no months of Kubernetes. Bring the servers; grund brings the production layer.</p>
+      <ol class="steps">
+        <li>
+          <span class="num">1</span>
+          <h3>Point grund at your servers.</h3>
+          <p>Three fresh dedicated machines become a highly available cluster, with a pinned, tested version of every component.</p>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <h3>Connect your repository.</h3>
+          <p>grund writes the cluster's desired state into your git. Review it like any other change.</p>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <h3>Deploy, and watch the evidence.</h3>
+          <p>Ship an image or a Dockerfile. Health gates, rollbacks, backups and drills are on from the first deploy.</p>
+        </li>
+      </ol>
+      <p class="note">This is how grund is designed to work. It is not available yet.</p>
     </div>
   </section>
 
   <section class="section" id="who">
     <div class="wrap">
-      <p class="eyebrow">Who it's for</p>
-      <h2>Built for small teams running a real product.</h2>
-      <div class="split">
+      <div class="section-head">
+        <h2>Built for small teams <span class="dim">running a real product.</span></h2>
+      </div>
+      <div class="who-grid">
         <div>
           <p class="list-title">A good fit</p>
           <ul class="list">
-            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span><strong>SaaS founders and product teams</strong> of one to ten engineers.</span></li>
-            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span><strong>Teams leaving a platform bill</strong> that grew faster than the product did.</span></li>
-            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span><strong>Anyone who wants Kubernetes' guarantees</strong> without running Kubernetes by hand.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>SaaS founders and product teams</strong> of one to ten engineers.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Teams leaving a platform bill</strong> that grew faster than the product did.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><strong>Anyone who wants Kubernetes' guarantees</strong> without running Kubernetes by hand.</span></li>
           </ul>
         </div>
         <div>
           <p class="list-title">Not what it is for</p>
           <ul class="list is-not">
-            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg><span><strong>A hobby project on one small server.</strong> Simpler tools serve it well.</span></li>
-            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg><span><strong>Enterprises</strong> that buy through a sales team.</span></li>
-            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg><span><strong>Multi-region, or an SLA on your hardware.</strong> You own the servers; grund owns the automation.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>A hobby project on one small server.</strong> Simpler tools serve it well.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>Enterprises</strong> that buy through a sales team.</span></li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg><span><strong>Multi-region, or an SLA on your hardware.</strong> You own the servers; grund owns the automation.</span></li>
           </ul>
         </div>
-      </div>
-      <div class="honest">
-        <p><strong>The cost, up front.</strong> Real high availability needs three servers, a quorum. On dedicated hardware from a provider like Hetzner, that is roughly €290 a month before storage.</p>
-        <p>A single-server setup is supported, and it is labelled honestly as not highly available.</p>
+        <div class="honest">
+          <p class="list-title">The cost, up front</p>
+          <p>Real high availability needs three servers, a quorum. On dedicated hardware from a provider like Hetzner that is roughly <strong>€290 a month</strong> before storage.</p>
+          <p>A single-server setup is supported, and labelled honestly as not highly available.</p>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="closing">
     <div class="wrap">
-      <svg class="mark" viewBox="7 6 38 29" aria-hidden="true"><path fill="currentColor" d="M20 20.5v-9A4.5 4.5 0 0 1 24.5 7h18a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-10v3.5z"/><rect fill="currentColor" x="8" y="23" width="36" height="11" rx="2"/></svg>
-      <h2>grund is being built in the open.</h2>
+      <svg class="mark" aria-hidden="true"><use href="#mark"/></svg>
+      <h2>grund is being built <span class="dim">in the open.</span></h2>
       <p class="section-lede">Follow along on GitHub, where the code appears as it lands.</p>
       <div class="actions">
-        <a class="button" href="https://github.com/grund-run">
-          <svg class="icon solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></svg>
-          Follow the build on GitHub
-        </a>
+        <a class="button" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Follow the build on GitHub</a>
       </div>
     </div>
   </section>
@@ -251,10 +251,7 @@
 
 <footer class="foot">
   <div class="wrap">
-    <a class="brand" href="/" aria-label="grund, home">
-      <svg class="mark" viewBox="7 6 38 29" aria-hidden="true"><path fill="currentColor" d="M20 20.5v-9A4.5 4.5 0 0 1 24.5 7h18a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5h-10v3.5z"/><rect fill="currentColor" x="8" y="23" width="36" height="11" rx="2"/></svg>
-      <span>grund</span>
-    </a>
+    <a class="brand" href="/" aria-label="grund, home"><svg class="mark" aria-hidden="true"><use href="#mark"/></svg><span>grund</span></a>
     <nav aria-label="Footer"><span class="sr-only">Font licenses:</span>
       <a href="https://github.com/grund-run">GitHub</a>
       <a href="/licenses/inter.txt">Inter</a>

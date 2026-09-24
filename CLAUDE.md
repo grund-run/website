@@ -69,7 +69,11 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 - The palette and type come from `design/reference/dashboard-overview.png`,
   and the colour tokens are at the top of `site/styles.css`. Keep the page and
-  the product looking like one thing.
+  the product looking like one thing. The dashboard is a colour reference
+  only; it is not shown on the page.
+- Icons are one inline SVG sprite at the top of `index.html`, used with
+  `<use href="#id">`. The hero strata SVG is generated artwork, inlined in the
+  page.
 - Copy must not present planned guarantees as shipped. The evidence examples
   are labelled as examples.
 - Look at it in a real browser with the real server, so the CSP applies:
@@ -93,10 +97,19 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 ## Open items
 
-- The page is a first version: the copy is drafted from the platform plan and
-  says plainly that grund is in development. The dashboard illustration is
-  HTML and CSS, not the PNG. Pricing is deliberately absent (still an
-  estimate). The CTA is GitHub, because there is no signup backend.
+- The page is a feature page in the boxes.dev mould (Kasper's direction,
+  2026-09-24):
+  - The hero is a large headline over a drawn "ground strata" backdrop, not a
+    product screenshot.
+  - Then four short facts, and two-tone section headings (claim, then a
+    grey qualifier).
+  - Split sections pair a mono-labelled list with one focused visual: the
+    evidence panel and the self-rolling-back release.
+  - Then ownership cards with small visuals, and three steps.
+  The copy is drafted from the platform plan and says plainly that grund is
+  in development; every visual is captioned as an example. Pricing is
+  deliberately absent (still an estimate). The call to action is GitHub,
+  because there is no signup backend.
 - **www.grund.run has no Ingress or certificate yet.** `kubernetes-app`
   0.1.12 renders a single `host`. The server already redirects www
   (`GRUND_WEBSITE_REDIRECT_HOSTS`). What is missing is a component field for
