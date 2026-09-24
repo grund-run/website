@@ -102,6 +102,54 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 
 ## Open items
 
+- The page tells one story: zero to production on your own premises, for any
+  app, homelab or SaaS (Kasper's direction, 2026-09-24). The layout is in the
+  boxes.dev mould.
+  - Hero over the drawn strata, then four facts.
+  - The journey: levels 0 to 5, each with one small terminal or panel.
+  - Two worked examples: a homelab on one mini PC, a SaaS on three servers.
+  - Then evidence, ownership (including moving from the closet to Hetzner
+    without a rewrite), who it is for, and the cost.
+- This widens the audience beyond PLATFORM.md, which excluded hobbyists.
+  Homelabs are now in scope, and the page says so.
+- The CLI commands in the journey are invented and captioned as illustrative.
+  Never show a pasteable `curl … | sh`: grund.run serves HTML.
+- Every visual is captioned as an example; grund is labelled in development
+  in the first line. Pricing is deliberately absent (still an estimate). The
+  call to action is GitHub, because there is no signup backend.
+
+## Editing the site
+
+- The palette and type come from `design/reference/dashboard-overview.png`,
+  and the colour tokens are at the top of `site/styles.css`. Keep the page and
+  the product looking like one thing. The dashboard is a colour reference
+  only; it is not shown on the page.
+- Icons are one inline SVG sprite at the top of `index.html`, used with
+  `<use href="#id">`. The hero strata SVG is generated artwork, inlined in the
+  page.
+- Copy must not present planned guarantees as shipped. The evidence examples
+  are labelled as examples.
+- Look at it in a real browser with the real server, so the CSP applies:
+  `cargo run`, then headless Chrome with `--screenshot` at 1440 px and 390 px
+  wide. `google-chrome-stable` is on this machine.
+
+## Gotchas
+
+- **`build.rs` panics on purpose** when `site/` lacks `index.html` or
+  `404.html`, holds an unknown extension, or has a file name outside
+  `[A-Za-z0-9._~@+-]`. The message names the file. Fix the site, not the check.
+- **Anything under `site/assets/` is cached for a year.** Never put an unhashed
+  file there.
+- **`the_embedded_html_needs_nothing_the_csp_forbids` fails** when the site
+  has inline script or style. Move it to a file under `assets/`.
+- The revision in `/health/ready` comes from `CI_COMMIT_SHA` at build time.
+  Local builds say `unknown`. Set `GRUND_WEBSITE_REVISION` to override.
+- `check.sh` runs the in-container build as root and then chowns
+  `target/musl` back to you. If you interrupt it, `target/musl` may be left
+  owned by root.
+
+## Open items
+
 - The page is a feature page in the boxes.dev mould (Kasper's direction,
   2026-09-24):
   - The hero is a large headline over a drawn "ground strata" backdrop, not a

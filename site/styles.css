@@ -345,8 +345,8 @@ h3 {
 }
 
 h1 {
-  max-width: 13ch;
-  font-size: clamp(3rem, 8.4vw, 6.4rem);
+  max-width: 17ch;
+  font-size: clamp(2.7rem, 7vw, 5.4rem);
   font-weight: 780;
   line-height: 0.98;
 }
@@ -782,53 +782,271 @@ h2 .dim {
   }
 }
 
-/* Three steps. */
+/* The journey: numbered levels, copy on one side, one small visual on the
+   other, alternating sides on wide screens. */
 
-.steps {
+.journey {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 3.5rem 0 0;
+  gap: clamp(2.5rem, 6vw, 4.5rem);
+  margin: clamp(3rem, 7vw, 5rem) 0 0;
   padding: 0;
   list-style: none;
   text-align: left;
 }
 
-.steps li {
-  padding: 1.6rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-raised);
+.level {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(1.5rem, 5vw, 4.5rem);
+  align-items: center;
 }
 
-.steps .num {
+.level:nth-child(even) .level-copy {
+  order: 2;
+}
+
+.level .num {
   display: inline-grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
-  margin-bottom: 1.4rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid rgb(184 218 179 / 0.35);
   border-radius: 50%;
   background: var(--active);
   color: var(--accent-text);
   font: 600 0.9rem var(--mono);
 }
 
-.steps h3 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
+.level h3 {
+  font-size: clamp(1.4rem, 2.4vw, 1.85rem);
+  font-weight: 740;
+  line-height: 1.12;
 }
 
-.steps p {
-  margin: 0.55rem 0 0;
+.level-copy p {
+  max-width: 30rem;
+  margin: 0.8rem 0 0;
   color: var(--text-2);
-  font-size: 0.97rem;
+  font-size: 1.02rem;
 }
 
 @media (max-width: 860px) {
-  .steps {
+  .level {
     grid-template-columns: 1fr;
+  }
+
+  .level:nth-child(even) .level-copy {
+    order: 0;
+  }
+}
+
+.shell {
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: #0f1512;
+  box-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.7);
+}
+
+.shell p {
+  margin: 0;
+  color: var(--text-2);
+  font: 0.84rem/1.75 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.shell .prompt {
+  color: var(--accent-text);
+}
+
+.shell .ok-line {
+  color: var(--ok);
+}
+
+.hw {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hw li {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+.hw .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--accent);
+}
+
+.hw strong {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.hw span {
+  color: var(--muted);
+  font: 0.78rem var(--mono);
+}
+
+.panel.mini {
+  box-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.7);
+}
+
+/* Two worked examples, homelab and SaaS. */
+
+.examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 3.25rem;
+  text-align: left;
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.example-head h3 {
+  margin-top: 0.4rem;
+  font-size: 1.35rem;
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+.example-head p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.kicker {
+  color: var(--accent-text);
+  font: 500 0.75rem var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.panel.apps {
+  background: var(--bg);
+  box-shadow: none;
+}
+
+.panel.apps .panel-head .muted {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.panel.apps .panel-head .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.app-rows {
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+}
+
+.app-rows li {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+}
+
+.app-rows li + li {
+  border-top: 1px solid var(--border);
+}
+
+.app-rows .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-rows strong {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.app-rows .mono {
+  color: var(--text-2);
+  font-size: 0.76rem;
+}
+
+.serving {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-2);
+  font-size: 0.88rem;
+}
+
+.c-orange {
+  color: var(--orange);
+}
+
+.c-blue {
+  color: var(--blue);
+}
+
+.c-violet {
+  color: var(--violet);
+}
+
+.outcomes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outcomes li {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.45rem 0;
+  color: var(--text-2);
+  font-size: 0.95rem;
+}
+
+.outcomes .icon {
+  margin-top: 0.15rem;
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .examples {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-rows li {
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+  }
+
+  .app-rows .serving {
+    grid-column: 2;
   }
 }
 
