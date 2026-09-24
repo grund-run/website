@@ -123,8 +123,22 @@ cargo fmt --all --check && cargo clippy --all-targets --locked -- -D warnings &&
 - The CLI commands are invented and captioned as illustrative. Never show a
   pasteable `curl … | sh`: grund.run serves HTML.
 - grund is labelled in development in the first line, and examples are
-  captioned as examples. No pricing (still an estimate). The call to action
-  is GitHub, because there is no signup backend.
+  captioned as examples. The call to action is GitHub, because there is no
+  signup backend.
+- `/pricing` (`site/pricing.html`) shows **planned** pricing, labelled as
+  such in its first line:
+  - Self-hosted: free forever, deploying never gated;
+  - Homelab: €5/mo, up to 3 machines;
+  - Pro: €15 per machine per month;
+  - Business: €49/mo + €15 per machine;
+  - plus a comparison table and FAQ.
+  The research and reasoning are in `design/pricing-research.md`; the
+  numbers are a proposal for Kasper. Price by the machine, never by traffic
+  or app count.
+- `/licenses` (`site/licenses.html`) holds the copyright notices and
+  licenses for third-party material (the OFL fonts), with full texts under
+  `site/licenses/`. Nowhere else on the site names them; the footer has one
+  "Licenses" link. Add any new third-party asset there.
 
 ## Editing the site
 

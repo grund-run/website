@@ -957,6 +957,271 @@ h2 .dim {
   justify-content: center;
 }
 
+/* ─── Sub-pages: pricing and licenses ────────────────────────────────── */
+
+.nav a[aria-current="page"] {
+  color: var(--text);
+  background: var(--bg-raised);
+}
+
+.page-hero {
+  padding: clamp(4rem, 9vw, 6.5rem) 0 clamp(2rem, 4vw, 3rem);
+}
+
+.page-hero h1 {
+  max-width: 20ch;
+  font-size: clamp(2.5rem, 6vw, 4.4rem);
+}
+
+.page-hero h1 .dim {
+  display: block;
+  color: #7b867f;
+}
+
+.wrap.narrow {
+  max-width: 50rem;
+}
+
+.section.tight {
+  padding-top: 1rem;
+  border-top: 0;
+}
+
+.note.center {
+  text-align: center;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.6rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.plan.is-featured {
+  border-color: rgb(184 218 179 / 0.45);
+  box-shadow: 0 0 80px -30px rgb(184 218 179 / 0.25);
+}
+
+.badge {
+  position: absolute;
+  top: -0.7rem;
+  left: 1.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.plan h2 {
+  font-size: 1.25rem;
+  font-weight: 720;
+  letter-spacing: -0.02em;
+}
+
+.plan-for {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* Four across: reserve two lines so every price sits on the same row. */
+@media (min-width: 1061px) {
+  .plan-for {
+    min-height: 2.9em;
+  }
+}
+
+.plans-section {
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+}
+
+.price {
+  display: flex;
+  flex-direction: column;
+  margin: 1.4rem 0 1.25rem;
+}
+
+.price strong {
+  font-size: 2.4rem;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.price span {
+  margin-top: 0.3rem;
+  color: var(--text-2);
+  font-size: 0.88rem;
+}
+
+.plan-list {
+  margin: 0;
+  padding: 1.1rem 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+
+.plan-list li {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+  color: var(--text-2);
+  font-size: 0.92rem;
+}
+
+.plan-list .icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+  color: var(--accent);
+}
+
+@media (max-width: 1060px) {
+  .plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 1.6rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .plans {
+    grid-template-columns: 1fr;
+  }
+}
+
+.table-wrap {
+  margin-top: 2.5rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.compare {
+  width: 100%;
+  min-width: 40rem;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+}
+
+.compare th,
+.compare td {
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-2);
+}
+
+.compare thead th {
+  background: var(--bg-raised);
+  color: var(--text);
+  font-weight: 650;
+}
+
+.compare tbody th {
+  text-align: left;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* On narrow screens the table scrolls sideways; keep the feature names in
+   view while it does. */
+.compare th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg-raised);
+}
+
+.compare tbody th {
+  background: var(--bg);
+}
+
+.compare tbody tr:last-child th,
+.compare tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.compare .icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0 auto;
+}
+
+.compare .yes {
+  color: var(--accent);
+}
+
+.compare .no {
+  color: var(--muted);
+}
+
+.faq {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(2rem, 5vw, 4rem);
+  margin: 2.5rem 0 0;
+}
+
+.faq div {
+  padding: 1.2rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.faq dt {
+  font-weight: 650;
+}
+
+.faq dd {
+  margin: 0.4rem 0 0;
+  color: var(--text-2);
+}
+
+@media (max-width: 760px) {
+  .faq {
+    grid-template-columns: 1fr;
+  }
+}
+
+.licenses {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.licenses li {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.licenses h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.licenses p {
+  margin: 0.5rem 0 0;
+  color: var(--text-2);
+}
+
+.licenses a:not(.more) {
+  color: var(--text);
+}
+
 /* ─── Footer ────────────────────────────────────────────────────────── */
 
 .foot {

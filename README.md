@@ -43,8 +43,9 @@ Endpoints:
 
 ```
 build.rs              walks site/, hashes and precompresses every file, emits the table
-site/                 the static site: index.html, 404.html, styles.css, favicon.svg, assets/ (fonts), licenses/
-design/reference/     the design the site follows
+site/                 the static site: index.html, pricing.html, licenses.html, 404.html, styles.css,
+                      favicon.svg, assets/ (fonts), licenses/ (full license texts)
+design/               reference/ (the design the site follows), pricing-research.md
 src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
 src/site.rs           the embedded table: path resolution, encoding negotiation, cache policy
