@@ -34,6 +34,14 @@ pub const CSP: &str = "default-src 'none'; script-src 'self'; style-src 'self'; 
     img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; \
     base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
+/// Paths the server answers itself, ahead of the site. Site links may point
+/// at them.
+#[cfg(test)]
+pub const SERVER_ROUTES: &[&str] = &["/health/live", "/health/ready", SIGN_IN];
+
+/// Sends visitors to the dashboard's login (GRUND_WEBSITE_APP_URL).
+pub const SIGN_IN: &str = "/sign-in";
+
 const PERMISSIONS_POLICY: &str =
     "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()";
 
@@ -60,6 +68,7 @@ pub fn router(state: State) -> Router {
     Router::new()
         .route("/health/live", get(live))
         .route("/health/ready", get(ready))
+        .route(SIGN_IN, get(sign_in))
         .fallback(serve_site)
         .layer(middleware::from_fn_with_state(state.clone(), canonical_host))
         // Outside the canonical-host redirect, so alias redirects (308) are
@@ -123,6 +132,23 @@ async fn ready(extract::State(state): extract::State<State>) -> Response {
         "site_digest": site.digest(),
         "files": site.len(),
     })))
+}
+
+/// A 302, never cached: where the dashboard lives is configuration, and a
+/// cached permanent redirect would outlive a change to it.
+async fn sign_in(
+    extract::State(state): extract::State<State>,
+    method: Method,
+    uri: Uri,
+    headers: HeaderMap,
+) -> Response {
+    match &state.config.app_url {
+        Some(app) => match HeaderValue::try_from(format!("{app}/login")) {
+            Ok(location) => no_store((StatusCode::FOUND, [(header::LOCATION, location)])),
+            Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+        },
+        None => serve_site(extract::State(state), method, uri, headers).await,
+    }
 }
 
 fn no_store(body: impl IntoResponse) -> Response {
@@ -340,6 +366,27 @@ mod tests {
         assert_eq!(header(&headers, "content-length"), "13");
         assert_eq!(header(&headers, "content-type"), "text/html; charset=utf-8");
         assert!(body.is_empty());
+    }
+
+    #[tokio::test]
+    async fn sign_in_sends_visitors_to_the_dashboard_login_uncached() {
+        let (status, headers, _) = send(
+            app(&["--app-url", "https://app.example.com"]),
+            get("/sign-in"),
+        )
+        .await;
+        assert_eq!(status, StatusCode::FOUND);
+        assert_eq!(
+            header(&headers, "location"),
+            "https://app.example.com/login"
+        );
+        assert_eq!(header(&headers, "cache-control"), "no-store");
+    }
+
+    #[tokio::test]
+    async fn sign_in_is_a_404_where_no_dashboard_is_configured() {
+        let (status, _, _) = send(app(&[]), get("/sign-in")).await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
     }
 
     #[tokio::test]

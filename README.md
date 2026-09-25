@@ -45,6 +45,7 @@ Configuration is flags or environment variables. There are no config files.
 | `GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER` | unset | Header carrying the client address as the edge saw it (`X-Real-Ip` behind Traefik) |
 | `GRUND_WEBSITE_INSIGHTS_TOKEN` | unset | Bearer token, when insights requires one (a secret) |
 | `GRUND_WEBSITE_INSIGHTS_SITE` | canonical host | Site name the views are reported under |
+| `GRUND_WEBSITE_APP_URL` | unset | Origin of grund's dashboard; `/sign-in` sends visitors to its `/login` (302, `no-store`). Unset, `/sign-in` is a 404 |
 | `GRUND_WEBSITE_LOG_FORMAT` | `compact` | `compact` or `json` (the image sets `json`) |
 | `RUST_LOG` | `grund_website=info,notmad=info,info` | Log filter |
 
@@ -53,6 +54,8 @@ Endpoints:
 - `GET /health/live`: `{"status":"ok"}`. Checks nothing.
 - `GET /health/ready`: status, `revision` (the build commit), `site_digest`
   and the file count.
+- `GET /sign-in`: a 302 to `$GRUND_WEBSITE_APP_URL/login`, never cached; a
+  404 where no app URL is set. The nav's "Sign in" links here.
 - Everything else: the site. `/` and `/dir/` serve `index.html` and
   `dir/index.html`, `/dir` 308s to `/dir/`, and `/page` serves `page`,
   `page.html` or `page.sh`. Anything else is `404.html` with status 404.
@@ -80,7 +83,7 @@ Dockerfile.prebuilt   scratch image around the prebuilt binary
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked                 # 51 unit tests + 18 accepttests against a spawned binary
+cargo test --locked                 # 54 unit tests + 21 accepttests against a spawned binary
 ./check.sh                          # the above, plus the accepttests against the static binary in a read-only scratch container
 ```
 

@@ -205,8 +205,20 @@ a {
   border: 1px solid var(--border-strong);
 }
 
+.nav .nav-signin {
+  margin-left: 0.25rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.nav .nav-signin:hover {
+  color: var(--accent-ink);
+  background: var(--accent-hover);
+}
+
 @media (max-width: 760px) {
-  .nav a:not(.nav-gh) {
+  .nav a:not(.nav-gh):not(.nav-signin) {
     display: none;
   }
 }

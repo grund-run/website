@@ -57,6 +57,13 @@ pub struct Config {
     #[arg(long, env = "GRUND_WEBSITE_SHUTDOWN_GRACE", value_parser = secs, default_value = "10")]
     pub shutdown_grace: Duration,
 
+    /// The origin of grund's dashboard, e.g. https://app.grund.sh. /sign-in
+    /// sends visitors to its login page. Unset, /sign-in is an ordinary 404,
+    /// for an environment whose dashboard is not deployed yet. Same form as
+    /// GRUND_WEBSITE_CANONICAL_ORIGIN.
+    #[arg(long, env = "GRUND_WEBSITE_APP_URL")]
+    pub app_url: Option<String>,
+
     /// Where page views are reported: the base URL of grund insights' ingest
     /// listener, plain http inside the cluster (e.g. http://grund-insights:8081).
     /// Unset, nothing is reported. Comes from forest config, never from code.
@@ -132,6 +139,14 @@ impl Config {
             !self.request_timeout.is_zero(),
             "GRUND_WEBSITE_REQUEST_TIMEOUT must be positive"
         );
+        self.app_url = self.app_url.take().filter(|url| !url.trim().is_empty());
+        if let Some(url) = &self.app_url {
+            anyhow::ensure!(
+                origin_host(url).is_some(),
+                "GRUND_WEBSITE_APP_URL must be an https origin with no path or trailing slash \
+                 (plain http only for loopback), got {url:?}"
+            );
+        }
         self.insights_url = self
             .insights_url
             .take()
@@ -243,6 +258,21 @@ mod tests {
     fn redirect_hosts_are_split_trimmed_and_lowercased() {
         let config = parse(&["--redirect-hosts", "WWW.grund.sh, grund.dev"]).unwrap();
         assert_eq!(config.redirect_hosts, ["www.grund.sh", "grund.dev"]);
+    }
+
+    #[test]
+    fn an_app_url_must_be_an_origin_and_an_empty_one_is_unset() {
+        for url in [
+            "https://app.grund.sh/",
+            "https://app.grund.sh/login",
+            "http://app.grund.sh",
+        ] {
+            let error = parse(&["--app-url", url]).unwrap_err().to_string();
+            assert!(error.contains("GRUND_WEBSITE_APP_URL"), "{url}: {error}");
+        }
+        assert_eq!(parse(&["--app-url", ""]).unwrap().app_url, None);
+        let config = parse(&["--app-url", "https://dev.app.grund.sh"]).unwrap();
+        assert_eq!(config.app_url.as_deref(), Some("https://dev.app.grund.sh"));
     }
 
     #[test]

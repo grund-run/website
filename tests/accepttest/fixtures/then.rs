@@ -68,6 +68,17 @@ impl Then {
 
     /// No byte after the headers: read to EOF on a closed connection, so
     /// nothing the server sent is hidden.
+    /// The body links `path` with `href="{path}"`.
+    pub fn links_to(&self, path: &str) -> anyhow::Result<&Self> {
+        let body = self.last()?.body;
+        let needle = format!("href=\"{path}\"");
+        ensure!(
+            String::from_utf8_lossy(&body).contains(&needle),
+            "the page has no link to {path}"
+        );
+        Ok(self)
+    }
+
     pub fn no_body_on_the_wire(&self) -> anyhow::Result<&Self> {
         let length = self.last()?.body.len();
         ensure!(length == 0, "{length} body bytes were sent");

@@ -48,6 +48,10 @@ kjuulh: "kubernetes-app": {
 					GRUND_WEBSITE_REDIRECT_HOSTS:   "dev.grund.run"
 					// A pre-production host must never land in a search index.
 					GRUND_WEBSITE_NOINDEX: "true"
+					// The nav's "Sign in" goes here (/sign-in, src/api.rs). Prod
+					// sets none until the dashboard has a prod deployment, so
+					// there /sign-in is a 404.
+					GRUND_WEBSITE_APP_URL: "https://dev.app.grund.sh"
 					// Page views for grund insights (src/insights.rs). The
 					// namespace-local Service name, not a hostname: in-cluster,
 					// plain http, never routed by an Ingress.

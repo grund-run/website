@@ -486,7 +486,8 @@ pub(crate) mod tests {
 
     /// Every same-origin link in the embedded HTML and CSS (`href="/…"`,
     /// `src="/…"`, `url("/…")`) names something the site serves. A renamed
-    /// asset or a typo fails here, not as a broken page in production.
+    /// asset or a typo fails here, not as a broken page in production. A
+    /// route the server answers itself (`api::SERVER_ROUTES`) counts too.
     #[test]
     fn every_local_link_in_the_embedded_site_resolves() {
         let site = Site::embedded();
@@ -503,7 +504,9 @@ pub(crate) mod tests {
                     let rest = &text[at + opener.len() - 1..];
                     let target: String = rest.chars().take_while(|c| *c != '"').collect();
                     let path = target.split(['#', '?']).next().unwrap_or("");
-                    if !matches!(site.resolve(path), Resolution::Found(_)) {
+                    if !crate::api::SERVER_ROUTES.contains(&path)
+                        && !matches!(site.resolve(path), Resolution::Found(_))
+                    {
                         broken.push(format!("{} -> {target}", entry.path));
                     }
                 }
