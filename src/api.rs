@@ -270,7 +270,7 @@ mod tests {
     use tower::ServiceExt;
 
     use super::*;
-    use crate::{config::Config, site::tests::fixture};
+    use crate::{config::Config, site::tests::fixture_sites};
 
     fn app(args: &[&str]) -> Router {
         use clap::Parser;
@@ -278,7 +278,7 @@ mod tests {
             Config::try_parse_from(std::iter::once("grund-website").chain(args.iter().copied()))
                 .unwrap();
         config.validate().unwrap();
-        router(State::new(config, fixture(), None))
+        router(State::new(config, fixture_sites(), None))
     }
 
     async fn send(app: Router, request: Request<Body>) -> (StatusCode, HeaderMap, Vec<u8>) {

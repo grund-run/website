@@ -27,8 +27,17 @@ pub struct Entry {
     pub gzip: Option<&'static [u8]>,
 }
 
+/// The site as it stands from `from` (Unix seconds) until the next variant.
+/// Scheduled blog posts are why there is more than one.
+#[derive(Debug)]
+pub struct Variant {
+    pub from: i64,
+    pub entries: &'static [Entry],
+    pub digest: &'static str,
+}
+
 mod embedded {
-    use super::Entry;
+    use super::{Entry, Variant};
     include!(concat!(env!("OUT_DIR"), "/site_entries.rs"));
 }
 
@@ -57,15 +66,12 @@ pub enum Resolution {
 }
 
 impl Site {
-    /// The site compiled into this binary. With `drafts`, blog drafts are
-    /// served too (GRUND_WEBSITE_BLOG_DRAFTS, dev); without, only what is
-    /// published.
+    /// The site compiled into this binary as it stands now. With `drafts`,
+    /// blog drafts and scheduled posts are served too
+    /// (GRUND_WEBSITE_BLOG_DRAFTS, dev); without, only what is published.
+    #[cfg(test)]
     pub fn embedded(drafts: bool) -> Self {
-        if drafts {
-            Self::new(embedded::DRAFT_ENTRIES, embedded::DRAFT_SITE_DIGEST)
-        } else {
-            Self::new(embedded::ENTRIES, embedded::SITE_DIGEST)
-        }
+        Sites::embedded(drafts).at(now())
     }
 
     /// `entries` must be sorted by path; `build.rs` guarantees it for the
@@ -256,13 +262,68 @@ pub fn if_none_match_hits(header: &str, etag: &str) -> bool {
         .any(|candidate| candidate.trim() == "*" || opaque(candidate) == ours)
 }
 
+/// Every variant of the site in this binary, and the rule for which one is
+/// served: the last whose `from` has passed. A scheduled post therefore
+/// appears on the first request after its moment, with no rebuild.
+#[derive(Clone, Copy)]
+pub struct Sites {
+    variants: &'static [Variant],
+}
+
+impl Sites {
+    pub fn embedded(drafts: bool) -> Self {
+        let variants = if drafts {
+            embedded::DRAFT_VARIANTS
+        } else {
+            embedded::PUBLIC_VARIANTS
+        };
+        Self::new(variants)
+    }
+
+    /// `variants` must be sorted by `from`, the first from `i64::MIN`;
+    /// `build.rs` guarantees it.
+    pub const fn new(variants: &'static [Variant]) -> Self {
+        Self { variants }
+    }
+
+    pub fn at(&self, unix_seconds: i64) -> Site {
+        let variant = self
+            .variants
+            .iter()
+            .rev()
+            .find(|v| v.from <= unix_seconds)
+            .unwrap_or(&self.variants[0]);
+        Site::new(variant.entries, variant.digest)
+    }
+
+    /// Scheduled moments still ahead of `unix_seconds`.
+    pub fn upcoming(&self, unix_seconds: i64) -> usize {
+        self.variants
+            .iter()
+            .filter(|v| v.from > unix_seconds)
+            .count()
+    }
+
+    #[cfg(test)]
+    pub fn all(&self) -> impl Iterator<Item = Site> + '_ {
+        self.variants.iter().map(|v| Site::new(v.entries, v.digest))
+    }
+}
+
+/// The wall clock as Unix seconds.
+pub fn now() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs() as i64)
+}
+
 pub trait SiteState {
     fn site(&self) -> Site;
 }
 
 impl SiteState for State {
     fn site(&self) -> Site {
-        self.site
+        self.sites.at(now())
     }
 }
 
@@ -315,6 +376,16 @@ pub(crate) mod tests {
 
     pub(crate) fn fixture() -> Site {
         Site::new(FIXTURE, "fixture-digest")
+    }
+
+    static FIXTURE_VARIANTS: &[Variant] = &[Variant {
+        from: i64::MIN,
+        entries: FIXTURE,
+        digest: "fixture-digest",
+    }];
+
+    pub(crate) fn fixture_sites() -> Sites {
+        Sites::new(FIXTURE_VARIANTS)
     }
 
     fn path_of(resolution: Resolution) -> Option<&'static str> {
@@ -441,8 +512,11 @@ pub(crate) mod tests {
     /// the designed site is dropped in, rather than in a browser console.
     #[test]
     fn the_embedded_html_needs_nothing_the_csp_forbids() {
-        let both = [Site::embedded(false), Site::embedded(true)];
-        for entry in both.iter().flat_map(|site| site.entries()) {
+        let all: Vec<Site> = [false, true]
+            .into_iter()
+            .flat_map(|drafts| Sites::embedded(drafts).all().collect::<Vec<_>>())
+            .collect();
+        for entry in all.iter().flat_map(|site| site.entries()) {
             if !entry.content_type.starts_with("text/html") {
                 continue;
             }
@@ -499,8 +573,11 @@ pub(crate) mod tests {
     #[test]
     fn every_local_link_in_the_embedded_site_resolves() {
         let mut broken = Vec::new();
-        for drafts in [false, true] {
-            let site = Site::embedded(drafts);
+        let all: Vec<Site> = [false, true]
+            .into_iter()
+            .flat_map(|drafts| Sites::embedded(drafts).all().collect::<Vec<_>>())
+            .collect();
+        for site in all {
             for entry in site.entries() {
                 let text_type = entry.content_type.starts_with("text/html")
                     || entry.content_type.starts_with("text/css");
@@ -609,6 +686,53 @@ pub(crate) mod tests {
                 );
             }
         }
+    }
+
+    /// Each scheduled moment only adds to the public site: every file of an
+    /// earlier variant is still served, identically unless it is a blog
+    /// listing, so a schedule can never take a page down.
+    #[test]
+    fn each_scheduled_variant_only_adds_to_the_one_before() {
+        let variants: Vec<Site> = Sites::embedded(false).all().collect();
+        for pair in variants.windows(2) {
+            for entry in pair[0].entries() {
+                let later = pair[1].get(entry.path);
+                assert!(
+                    later.is_some(),
+                    "{} disappears at a scheduled moment",
+                    entry.path
+                );
+                let listing = entry.path == "blog/index.html" || entry.path == "blog/feed.xml";
+                if !listing {
+                    assert_eq!(later.unwrap().hash, entry.hash, "{}", entry.path);
+                }
+            }
+        }
+    }
+
+    static A: &[Entry] = &[];
+    static B: &[Entry] = &[];
+    static SCHEDULE: &[Variant] = &[
+        Variant {
+            from: i64::MIN,
+            entries: A,
+            digest: "before",
+        },
+        Variant {
+            from: 1_000,
+            entries: B,
+            digest: "after",
+        },
+    ];
+
+    #[test]
+    fn the_variant_served_switches_exactly_at_its_moment() {
+        let sites = Sites::new(SCHEDULE);
+        assert_eq!(sites.at(999).digest(), "before");
+        assert_eq!(sites.at(1_000).digest(), "after");
+        assert_eq!(sites.at(i64::MAX).digest(), "after");
+        assert_eq!(sites.upcoming(999), 1);
+        assert_eq!(sites.upcoming(1_000), 0);
     }
 
     #[test]

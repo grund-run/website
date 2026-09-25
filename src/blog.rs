@@ -22,6 +22,13 @@
 //! with a draft banner and `noindex`. With no published post, the public
 //! build has no blog at all.
 //!
+//! `publish_at: 2026-10-01T09:00:00Z` (UTC, optional) schedules a post. The
+//! build renders the public blog once per scheduled time (`schedule`), and the
+//! server serves the newest rendering whose time has passed, so the post, its
+//! index entry and its feed entry all appear at that moment and not before.
+//! Nothing of it is in what is served earlier. Where drafts are on, it shows
+//! at once, marked as scheduled.
+//!
 //! Markdown is CommonMark plus tables and strikethrough. Raw HTML in a post is
 //! shown as text, never passed through: the site's CSP allows no inline
 //! script or style, and a post must not be able to add either. Headings move
@@ -36,7 +43,17 @@ pub struct Post {
     pub date: String,
     pub summary: String,
     pub draft: bool,
+    /// Unix seconds (UTC) from which the post is public, when scheduled.
+    pub publish_at: Option<i64>,
     pub body_html: String,
+}
+
+/// Which blog to render: the public one as it stands at a moment (Unix
+/// seconds), or the one dev shows, with every draft and scheduled post.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum View {
+    Public { at: i64 },
+    Drafts,
 }
 
 /// The two page templates, from `blog/templates/`. Placeholders are
@@ -77,6 +94,7 @@ pub fn parse(slug: &str, source: &str) -> Result<Post, String> {
         .ok_or("the front matter has no closing --- line")?;
 
     let (mut title, mut date, mut summary, mut draft) = (None, None, None, false);
+    let mut publish_at = None;
     for line in front.lines().filter(|l| !l.trim().is_empty()) {
         let (key, value) = line
             .split_once(':')
@@ -86,6 +104,11 @@ pub fn parse(slug: &str, source: &str) -> Result<Post, String> {
             "title" => title = Some(value),
             "date" => date = Some(value),
             "summary" => summary = Some(value),
+            "publish_at" => {
+                publish_at = Some(parse_utc(&value).ok_or_else(|| {
+                    format!("publish_at must be UTC like 2026-10-01T09:00:00Z, not {value:?}")
+                })?)
+            }
             "draft" => {
                 draft = match value.as_str() {
                     "true" => true,
@@ -112,23 +135,38 @@ pub fn parse(slug: &str, source: &str) -> Result<Post, String> {
         date,
         summary,
         draft,
+        publish_at,
         body_html: markdown(body),
     })
 }
 
-/// Everything the blog adds to the site, for one build: the posts, the index
-/// at `blog/index.html` and the Atom feed at `blog/feed.xml`. With
-/// `include_drafts` false, drafts are left out, and with no post left there
-/// is no blog at all. Posts are listed newest first.
-pub fn render(
-    posts: &[Post],
-    templates: &Templates,
-    include_drafts: bool,
-) -> Result<Vec<File>, String> {
+/// The moments the public blog changes: every distinct `publish_at` of a
+/// post that is not a draft, earliest first. The build renders the public
+/// blog once before the first and once at each.
+pub fn schedule(posts: &[Post]) -> Vec<i64> {
+    let mut times: Vec<i64> = posts
+        .iter()
+        .filter(|p| !p.draft)
+        .filter_map(|p| p.publish_at)
+        .collect();
+    times.sort_unstable();
+    times.dedup();
+    times
+}
+
+/// Everything the blog adds to the site, for one view: the posts, the index
+/// at `blog/index.html` and the Atom feed at `blog/feed.xml`. The public view
+/// leaves out drafts and posts scheduled after `at`, and with no post left
+/// there is no blog at all. Posts are listed newest first.
+pub fn render(posts: &[Post], templates: &Templates, view: View) -> Result<Vec<File>, String> {
     let mut shown: Vec<&Post> = posts
         .iter()
-        .filter(|p| include_drafts || !p.draft)
+        .filter(|p| match view {
+            View::Drafts => true,
+            View::Public { at } => !p.draft && p.publish_at.is_none_or(|t| t <= at),
+        })
         .collect();
+    let marked = view == View::Drafts;
     if shown.is_empty() {
         return Ok(Vec::new());
     }
@@ -145,7 +183,7 @@ pub fn render(
                 ("date_iso", &post.date),
                 ("date", &human_date(&post.date)),
                 ("robots", robots(post.draft)),
-                ("draft_banner", draft_banner(post.draft)),
+                ("draft_banner", &banner(post, marked)),
                 ("content", &post.body_html),
             ],
         )
@@ -156,7 +194,7 @@ pub fn render(
         });
     }
 
-    let items: String = shown.iter().map(|p| index_item(p)).collect();
+    let items: String = shown.iter().map(|p| index_item(p, marked)).collect();
     let any_draft = shown.iter().any(|p| p.draft);
     let index = fill(
         templates.index,
@@ -208,11 +246,11 @@ fn demote(level: HeadingLevel) -> HeadingLevel {
     }
 }
 
-fn index_item(post: &Post) -> String {
-    let tag = if post.draft {
-        r#" <span class="draft-tag">Draft</span>"#
-    } else {
-        ""
+fn index_item(post: &Post, marked: bool) -> String {
+    let tag = match (marked, post.draft, post.publish_at) {
+        (_, true, _) => r#" <span class="draft-tag">Draft</span>"#,
+        (true, false, Some(_)) => r#" <span class="draft-tag">Scheduled</span>"#,
+        _ => "",
     };
     format!(
         "<li class=\"post-item\"><a href=\"/blog/{slug}\"><time datetime=\"{iso}\">{date}</time>\
@@ -262,12 +300,72 @@ fn robots(draft: bool) -> &'static str {
     }
 }
 
-fn draft_banner(draft: bool) -> &'static str {
-    if draft {
-        r#"<p class="pill draft-banner"><span class="dot"></span> Draft. Not published: visible only where drafts are turned on.</p>"#
-    } else {
-        ""
+fn banner(post: &Post, marked: bool) -> String {
+    match (post.draft, marked.then_some(post.publish_at).flatten()) {
+        (true, _) => r#"<p class="pill draft-banner"><span class="dot"></span> Draft. Not published: visible only where drafts are turned on.</p>"#.into(),
+        (false, Some(at)) => format!(
+            r#"<p class="pill draft-banner"><span class="dot"></span> Scheduled. Public from {} UTC.</p>"#,
+            human_time(at)
+        ),
+        _ => String::new(),
     }
+}
+
+/// `2026-10-01T09:00:00Z` or `2026-10-01T09:00Z` as Unix seconds. UTC only:
+/// a schedule in someone's local time would move with the server's zone.
+fn parse_utc(text: &str) -> Option<i64> {
+    let (date, time) = text.strip_suffix('Z')?.split_once('T')?;
+    if !valid_date(date) {
+        return None;
+    }
+    let mut d = date.split('-').map(|p| p.parse::<i64>());
+    let (year, month, day) = (d.next()?.ok()?, d.next()?.ok()?, d.next()?.ok()?);
+    let parts: Vec<&str> = time.split(':').collect();
+    if !(parts.len() == 2 || parts.len() == 3)
+        || parts
+            .iter()
+            .any(|p| p.len() != 2 || !p.bytes().all(|b| b.is_ascii_digit()))
+    {
+        return None;
+    }
+    let field = |i: usize| parts.get(i).map_or(Some(0), |p| p.parse::<i64>().ok());
+    let (hour, minute, second) = (field(0)?, field(1)?, field(2)?);
+    if hour > 23 || minute > 59 || second > 59 {
+        return None;
+    }
+    Some(days_from_civil(year, month, day) * 86_400 + hour * 3_600 + minute * 60 + second)
+}
+
+/// Days since 1970-01-01 (Howard Hinnant's algorithm).
+fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
+    let y = if month <= 2 { year - 1 } else { year };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let mp = (month + 9) % 12;
+    let doy = (153 * mp + 2) / 5 + day - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    era * 146_097 + doe - 719_468
+}
+
+/// Unix seconds as `1 October 2026, 09:00`.
+fn human_time(at: i64) -> String {
+    let days = at.div_euclid(86_400);
+    let secs = at.rem_euclid(86_400);
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!(
+        "{}, {:02}:{:02}",
+        human_date(&format!("{year:04}-{month:02}-{day:02}")),
+        secs / 3_600,
+        secs % 3_600 / 60
+    )
 }
 
 /// Replaces every `{{name}}` in `template`. An unknown or unfilled
@@ -353,6 +451,8 @@ fn human_date(date: &str) -> String {
 mod tests {
     use super::*;
 
+    const PUBLIC: View = View::Public { at: i64::MAX };
+
     const TEMPLATES: Templates = Templates {
         post: "{{robots}}<h1>{{title}}</h1>{{draft_banner}}<time datetime=\"{{date_iso}}\">{{date}}</time><p>{{summary}}</p><a href=\"/blog/{{slug}}\"></a>{{content}}",
         index: "{{robots}}<ul>{{posts}}</ul>",
@@ -385,7 +485,7 @@ mod tests {
         assert!(p.body_html.contains("<em>words</em>"));
         assert!(p.body_html.contains("<table>"));
 
-        let files = render(&[p], &TEMPLATES, false).unwrap();
+        let files = render(&[p], &TEMPLATES, PUBLIC).unwrap();
         let html = page(&files, "blog/a-post.html");
         assert!(html.contains("<h1>Hello &amp; welcome</h1>"), "{html}");
         assert!(html.contains("25 September 2026"));
@@ -410,12 +510,12 @@ mod tests {
         draft.draft = true;
         let posts = [published("old", "2026-09-01"), draft];
 
-        let public = render(&posts, &TEMPLATES, false).unwrap();
+        let public = render(&posts, &TEMPLATES, PUBLIC).unwrap();
         assert!(public.iter().all(|f| f.path != "blog/draft-one.html"));
         assert!(!page(&public, "blog/index.html").contains("draft-one"));
         assert!(!page(&public, "blog/feed.xml").contains("draft-one"));
 
-        let with_drafts = render(&posts, &TEMPLATES, true).unwrap();
+        let with_drafts = render(&posts, &TEMPLATES, View::Drafts).unwrap();
         let draft_page = page(&with_drafts, "blog/draft-one.html");
         assert!(draft_page.contains("noindex") && draft_page.contains("Draft."));
         let index = page(&with_drafts, "blog/index.html");
@@ -426,7 +526,7 @@ mod tests {
     fn with_no_published_post_there_is_no_blog() {
         let mut draft = published("only", "2026-09-26");
         draft.draft = true;
-        assert!(render(&[draft], &TEMPLATES, false).unwrap().is_empty());
+        assert!(render(&[draft], &TEMPLATES, PUBLIC).unwrap().is_empty());
     }
 
     #[test]
@@ -435,7 +535,7 @@ mod tests {
             published("older", "2026-01-02"),
             published("newer", "2026-03-04"),
         ];
-        let files = render(&posts, &TEMPLATES, false).unwrap();
+        let files = render(&posts, &TEMPLATES, PUBLIC).unwrap();
         let index = page(&files, "blog/index.html");
         assert!(index.find("newer").unwrap() < index.find("older").unwrap());
         let feed = page(&files, "blog/feed.xml");
@@ -467,12 +567,69 @@ mod tests {
     }
 
     #[test]
+    fn a_scheduled_post_is_public_from_its_moment_and_not_a_second_before() {
+        let mut scheduled = published("soon", "2026-10-01");
+        scheduled.publish_at = parse_utc("2026-10-01T09:00:00Z");
+        let at = scheduled.publish_at.unwrap();
+        let posts = [published("now", "2026-09-01"), scheduled];
+
+        assert_eq!(schedule(&posts), vec![at]);
+        let before = render(&posts, &TEMPLATES, View::Public { at: at - 1 }).unwrap();
+        assert!(before.iter().all(|f| f.path != "blog/soon.html"));
+        assert!(!page(&before, "blog/index.html").contains("soon"));
+        assert!(!page(&before, "blog/feed.xml").contains("soon"));
+
+        let after = render(&posts, &TEMPLATES, View::Public { at }).unwrap();
+        let html = page(&after, "blog/soon.html");
+        assert!(!html.contains("Scheduled") && !html.contains("noindex"));
+        assert!(page(&after, "blog/index.html").contains("soon"));
+
+        let dev = render(&posts, &TEMPLATES, View::Drafts).unwrap();
+        assert!(
+            page(&dev, "blog/soon.html")
+                .contains("Scheduled. Public from 1 October 2026, 09:00 UTC.")
+        );
+        assert!(page(&dev, "blog/index.html").contains(">Scheduled<"));
+    }
+
+    #[test]
+    fn publish_at_must_be_utc_and_real() {
+        assert_eq!(parse_utc("1970-01-01T00:00:00Z"), Some(0));
+        assert_eq!(parse_utc("2026-10-01T09:00Z"), Some(1_790_845_200));
+        assert_eq!(human_time(1_790_845_200), "1 October 2026, 09:00");
+        for bad in [
+            "2026-10-01T09:00:00",
+            "2026-10-01 09:00Z",
+            "2026-10-01T25:00Z",
+            "2026-10-01T09:00+02:00",
+        ] {
+            assert_eq!(parse_utc(bad), None, "{bad}");
+        }
+        let error = post(
+            "title: t\ndate: 2026-09-05\nsummary: s\npublish_at: tomorrow",
+            "x",
+        )
+        .err()
+        .unwrap_or_default();
+        assert!(error.contains("publish_at"), "{error}");
+    }
+
+    #[test]
+    fn a_draft_is_never_scheduled_into_the_public_blog() {
+        let mut draft = published("wip", "2026-10-01");
+        draft.draft = true;
+        draft.publish_at = Some(0);
+        assert!(schedule(std::slice::from_ref(&draft)).is_empty());
+        assert!(render(&[draft], &TEMPLATES, PUBLIC).unwrap().is_empty());
+    }
+
+    #[test]
     fn a_template_with_an_unknown_placeholder_fails_the_build() {
         let broken = Templates {
             post: "{{titel}}",
             index: TEMPLATES.index,
         };
-        let error = render(&[published("a", "2026-01-01")], &broken, false)
+        let error = render(&[published("a", "2026-01-01")], &broken, PUBLIC)
             .err()
             .unwrap();
         assert!(error.contains("titel"), "{error}");

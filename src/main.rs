@@ -22,19 +22,21 @@ mod state;
 
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{config::Config, site::Site, state::State};
+use crate::{config::Config, site::Sites, state::State};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let config = Config::validated()?;
     init_tracing(&config);
 
-    let site = Site::embedded(config.blog_drafts);
+    let sites = Sites::embedded(config.blog_drafts);
+    let site = sites.at(site::now());
     tracing::info!(
         revision = site::REVISION,
         site_digest = site.digest(),
         files = site.len(),
         blog_drafts = config.blog_drafts,
+        scheduled_ahead = sites.upcoming(site::now()),
         canonical_origin = %config.canonical_origin,
         "serving embedded site"
     );
@@ -58,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
         }
         None => (None, None),
     };
-    let state = State::new(config, site, insights);
+    let state = State::new(config, sites, insights);
 
     // The listener first, so it stops taking requests before the sender
     // makes its last, bounded send.

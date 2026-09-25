@@ -53,6 +53,16 @@ The post, in CommonMark with tables. `#` headings become `h2`: the title is the 
   no blog at all. To publish, set `draft: false` (or remove the line) and
   ship. The nav links the blog from its own pages; add a link from the other
   pages with the first published post.
+- **Scheduling.** `publish_at: 2026-10-01T09:00:00Z` (UTC only) makes a
+  post public from that moment. `build.rs` renders the public site once
+  before the first scheduled moment and once from each, and the server serves
+  the newest rendering whose moment has passed. The post, its index entry and
+  its feed entry appear on the first request after the moment. Nothing of the
+  post is in what is served before it, and no rebuild or redeploy happens at
+  the moment. The image must be deployed before then, and a promotion to prod
+  is still a person's step. Where drafts are on, a scheduled post shows at
+  once, marked "Scheduled". `/health/ready`'s `site_digest` changes at the
+  moment, which is how to prove from outside that it happened.
 - **Raw HTML in a post is shown as text,** never passed through, so a post
   cannot add script or style the CSP forbids. Images go in
   `site/assets/` under a content-hashed name, like every other asset.
@@ -109,7 +119,7 @@ site/                 the static site: index.html, pricing.html, licenses.html, 
 design/reference/     the design the site follows
 src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
-src/site.rs           the embedded tables: path resolution, encoding negotiation, cache policy
+src/site.rs           the embedded tables and which is served now: path resolution, encoding negotiation, cache policy
 src/blog.rs           markdown posts to pages, index and feed (used by build.rs)
 src/canonical.rs      alias host -> canonical origin redirects
 src/api.rs            router, security headers, health, file responses
@@ -124,7 +134,7 @@ Dockerfile.prebuilt   scratch image around the prebuilt binary
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked                 # 62 unit tests + 23 accepttests against a spawned binary
+cargo test --locked                 # 67 unit tests + 23 accepttests against a spawned binary
 ./check.sh                          # the above, plus the accepttests against the static binary in a read-only scratch container
 ```
 
