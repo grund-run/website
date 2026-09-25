@@ -48,6 +48,9 @@ kjuulh: "kubernetes-app": {
 					GRUND_WEBSITE_REDIRECT_HOSTS:   "dev.grund.run"
 					// A pre-production host must never land in a search index.
 					GRUND_WEBSITE_NOINDEX: "true"
+					// Blog drafts (draft: true in blog/posts/) are served here only,
+					// marked as drafts and noindex. Prod serves published posts.
+					GRUND_WEBSITE_BLOG_DRAFTS: "true"
 					// The nav's "Sign in" goes here (/sign-in, src/api.rs). Prod
 					// sets none until the dashboard has a prod deployment, so
 					// there /sign-in is a 404.

@@ -41,6 +41,12 @@ pub struct Config {
     #[arg(long, env = "GRUND_WEBSITE_NOINDEX", default_value_t = false, action = clap::ArgAction::Set)]
     pub noindex: bool,
 
+    /// Serve blog drafts (posts with `draft: true`) and list them on /blog/,
+    /// each marked as a draft and `noindex`. Set on dev only: without it, a
+    /// draft is a 404, and with no published post there is no blog.
+    #[arg(long, env = "GRUND_WEBSITE_BLOG_DRAFTS", default_value_t = false, action = clap::ArgAction::Set)]
+    pub blog_drafts: bool,
+
     /// Strict-Transport-Security max-age in seconds; 0 sends no header. Enable
     /// only once HTTPS on every host of this origin is proven: browsers keep
     /// the promise for the whole max-age even if TLS later breaks.

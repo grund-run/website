@@ -11,6 +11,8 @@ pub struct Exchange {
     pub baseline: Option<Response>,
     /// An `/assets/...` path the home page links to.
     pub asset: Option<String>,
+    /// The `/blog/<slug>` paths the drafts-on blog index marks as drafts.
+    pub drafts: Vec<String>,
 }
 
 #[derive(Clone)]

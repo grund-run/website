@@ -57,8 +57,15 @@ pub enum Resolution {
 }
 
 impl Site {
-    pub fn embedded() -> Self {
-        Self::new(embedded::ENTRIES, embedded::SITE_DIGEST)
+    /// The site compiled into this binary. With `drafts`, blog drafts are
+    /// served too (GRUND_WEBSITE_BLOG_DRAFTS, dev); without, only what is
+    /// published.
+    pub fn embedded(drafts: bool) -> Self {
+        if drafts {
+            Self::new(embedded::DRAFT_ENTRIES, embedded::DRAFT_SITE_DIGEST)
+        } else {
+            Self::new(embedded::ENTRIES, embedded::SITE_DIGEST)
+        }
     }
 
     /// `entries` must be sorted by path; `build.rs` guarantees it for the
@@ -434,7 +441,8 @@ pub(crate) mod tests {
     /// the designed site is dropped in, rather than in a browser console.
     #[test]
     fn the_embedded_html_needs_nothing_the_csp_forbids() {
-        for entry in Site::embedded().entries() {
+        let both = [Site::embedded(false), Site::embedded(true)];
+        for entry in both.iter().flat_map(|site| site.entries()) {
             if !entry.content_type.starts_with("text/html") {
                 continue;
             }
@@ -490,24 +498,26 @@ pub(crate) mod tests {
     /// route the server answers itself (`api::SERVER_ROUTES`) counts too.
     #[test]
     fn every_local_link_in_the_embedded_site_resolves() {
-        let site = Site::embedded();
         let mut broken = Vec::new();
-        for entry in site.entries() {
-            let text_type = entry.content_type.starts_with("text/html")
-                || entry.content_type.starts_with("text/css");
-            if !text_type {
-                continue;
-            }
-            let text = String::from_utf8_lossy(entry.identity);
-            for opener in ["href=\"/", "src=\"/", "url(\"/"] {
-                for (at, _) in text.match_indices(opener) {
-                    let rest = &text[at + opener.len() - 1..];
-                    let target: String = rest.chars().take_while(|c| *c != '"').collect();
-                    let path = target.split(['#', '?']).next().unwrap_or("");
-                    if !crate::api::SERVER_ROUTES.contains(&path)
-                        && !matches!(site.resolve(path), Resolution::Found(_))
-                    {
-                        broken.push(format!("{} -> {target}", entry.path));
+        for drafts in [false, true] {
+            let site = Site::embedded(drafts);
+            for entry in site.entries() {
+                let text_type = entry.content_type.starts_with("text/html")
+                    || entry.content_type.starts_with("text/css");
+                if !text_type {
+                    continue;
+                }
+                let text = String::from_utf8_lossy(entry.identity);
+                for opener in ["href=\"/", "src=\"/", "url(\"/"] {
+                    for (at, _) in text.match_indices(opener) {
+                        let rest = &text[at + opener.len() - 1..];
+                        let target: String = rest.chars().take_while(|c| *c != '"').collect();
+                        let path = target.split(['#', '?']).next().unwrap_or("");
+                        if !crate::api::SERVER_ROUTES.contains(&path)
+                            && !matches!(site.resolve(path), Resolution::Found(_))
+                        {
+                            broken.push(format!("{} -> {target}", entry.path));
+                        }
                     }
                 }
             }
@@ -524,7 +534,7 @@ pub(crate) mod tests {
     /// way the pipe does, on stdin.
     #[test]
     fn the_short_install_path_serves_the_install_script() {
-        let site = Site::embedded();
+        let site = Site::embedded(false);
         assert_eq!(path_of(site.resolve("/install")), Some("install.sh"));
         assert_eq!(path_of(site.resolve("/install.sh")), Some("install.sh"));
     }
@@ -534,7 +544,7 @@ pub(crate) mod tests {
         use std::io::Write;
         use std::process::{Command, Stdio};
 
-        let script = Site::embedded()
+        let script = Site::embedded(false)
             .get("install.sh")
             .expect("install.sh is part of the site");
         assert!(script.content_type.starts_with("text/plain"));
@@ -574,9 +584,36 @@ pub(crate) mod tests {
         );
     }
 
+    /// Drafts only ever add to the public site: every public file is served
+    /// identically with drafts on, and nothing the public table lacks is a
+    /// published post.
+    #[test]
+    fn the_drafts_site_is_the_public_site_plus_drafts() {
+        let public = Site::embedded(false);
+        let drafts = Site::embedded(true);
+        for entry in public.entries() {
+            let other = drafts.get(entry.path);
+            let blog_listing = entry.path == "blog/index.html" || entry.path == "blog/feed.xml";
+            assert!(other.is_some(), "{} is missing with drafts on", entry.path);
+            if !blog_listing {
+                assert_eq!(other.unwrap().hash, entry.hash, "{}", entry.path);
+            }
+        }
+        for entry in drafts.entries() {
+            if public.get(entry.path).is_none() && entry.path != "blog/feed.xml" {
+                let html = String::from_utf8_lossy(entry.identity);
+                assert!(
+                    entry.path.starts_with("blog/") && html.contains("noindex"),
+                    "{} is served only with drafts on, but is not a draft page",
+                    entry.path
+                );
+            }
+        }
+    }
+
     #[test]
     fn the_embedded_site_has_its_required_documents() {
-        let site = Site::embedded();
+        let site = Site::embedded(false);
         assert!(site.get("index.html").is_some());
         assert!(site.not_found_document().is_some());
         assert!(

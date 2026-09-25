@@ -4,13 +4,15 @@
 //!   request ─► trace ─► security headers ─► panic guard ─► timeout
 //!           ─► canonical host (308 alias -> origin)
 //!           ─► /health/live, /health/ready
-//!           └► static site, embedded by build.rs from site/
+//!           └► static site, embedded by build.rs from site/ and blog/
 //! ```
 //!
 //! No database, no outbound calls, no filesystem at runtime: every response
 //! comes from a table compiled into the binary.
 
 mod api;
+#[cfg(test)]
+mod blog;
 mod canonical;
 mod config;
 mod insights;
@@ -27,11 +29,12 @@ async fn main() -> anyhow::Result<()> {
     let config = Config::validated()?;
     init_tracing(&config);
 
-    let site = Site::embedded();
+    let site = Site::embedded(config.blog_drafts);
     tracing::info!(
         revision = site::REVISION,
         site_digest = site.digest(),
         files = site.len(),
+        blog_drafts = config.blog_drafts,
         canonical_origin = %config.canonical_origin,
         "serving embedded site"
     );

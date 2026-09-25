@@ -29,9 +29,14 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"]
 [build-dependencies]
 brotli = "9"
 flate2 = "1"
+# The blog: markdown under blog/posts/ is rendered to HTML at build time
+# (src/blog.rs), so nothing parses markdown at runtime.
+pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
 sha2 = "0.11"
 
 [dev-dependencies]
+# src/blog.rs is shared with build.rs; its unit tests run in the crate.
+pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
 # The accepttests speak raw HTTP/1.1 so that what they assert is what went over
 # the wire: traversal probes are sent unnormalised, and a HEAD body would be
 # seen. TLS is for running them against a live https origin. ring, not the

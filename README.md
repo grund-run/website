@@ -28,6 +28,39 @@ The requirements record, agent notes and design research live in
 [grund/grund-docs](https://git.kjuulh.io/grund/grund-docs/src/branch/main/website)
 under `website/` (private).
 
+## The blog
+
+Posts are markdown files in `blog/posts/<slug>.md`, served at
+`/blog/<slug>`, with an index at `/blog/` and an Atom feed at
+`/blog/feed.xml`. `build.rs` renders them at build time with the templates in
+`blog/templates/` (the rules are in `src/blog.rs`), so the binary still serves
+only an embedded table. Every post starts with front matter:
+
+```markdown
+---
+title: What the post is called
+date: 2026-09-25
+summary: One sentence for the index, the feed and link previews.
+draft: true
+---
+
+The post, in CommonMark with tables. `#` headings become `h2`: the title is the page's `h1`.
+```
+
+- **Drafts** (`draft: true`) are served only where
+  `GRUND_WEBSITE_BLOG_DRAFTS` is on (dev), with a draft banner and
+  `noindex`. In prod a draft is a 404, and with no published post there is
+  no blog at all. To publish, set `draft: false` (or remove the line) and
+  ship. The nav links the blog from its own pages; add a link from the other
+  pages with the first published post.
+- **Raw HTML in a post is shown as text,** never passed through, so a post
+  cannot add script or style the CSP forbids. Images go in
+  `site/assets/` under a content-hashed name, like every other asset.
+- A post with bad front matter, an unknown template placeholder or a path a
+  file under `site/` already has fails the build, naming the file.
+- Preview: `GRUND_WEBSITE_BLOG_DRAFTS=true cargo run`, then
+  http://127.0.0.1:8080/blog/.
+
 ## Run it
 
 ```bash
@@ -43,6 +76,7 @@ Configuration is flags or environment variables. There are no config files.
 | `GRUND_WEBSITE_CANONICAL_ORIGIN` | `https://grund.sh` | The one origin; alias hosts redirect here |
 | `GRUND_WEBSITE_REDIRECT_HOSTS` | empty | Comma-separated hosts that 308 to the canonical origin |
 | `GRUND_WEBSITE_NOINDEX` | `false` | Send `X-Robots-Tag: noindex` (dev) |
+| `GRUND_WEBSITE_BLOG_DRAFTS` | `false` | Serve blog drafts, marked and `noindex` (dev) |
 | `GRUND_WEBSITE_HSTS_MAX_AGE` | `0` (off) | HSTS max-age in seconds |
 | `GRUND_WEBSITE_REQUEST_TIMEOUT` | `10` | Seconds per request |
 | `GRUND_WEBSITE_SHUTDOWN_GRACE` | `10` | Seconds to drain on SIGTERM, at most 30 |
@@ -69,12 +103,14 @@ Endpoints:
 
 ```
 build.rs              walks site/, hashes and precompresses every file, emits the table
+blog/posts/           blog posts in markdown; blog/templates/ the post and index pages
 site/                 the static site: index.html, pricing.html, licenses.html, 404.html, styles.css,
                       favicon.svg, assets/ (fonts), licenses/ (full license texts)
 design/reference/     the design the site follows
 src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
-src/site.rs           the embedded table: path resolution, encoding negotiation, cache policy
+src/site.rs           the embedded tables: path resolution, encoding negotiation, cache policy
+src/blog.rs           markdown posts to pages, index and feed (used by build.rs)
 src/canonical.rs      alias host -> canonical origin redirects
 src/api.rs            router, security headers, health, file responses
 src/server.rs         the HTTP notmad component
@@ -88,7 +124,7 @@ Dockerfile.prebuilt   scratch image around the prebuilt binary
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked                 # 54 unit tests + 21 accepttests against a spawned binary
+cargo test --locked                 # 62 unit tests + 23 accepttests against a spawned binary
 ./check.sh                          # the above, plus the accepttests against the static binary in a read-only scratch container
 ```
 

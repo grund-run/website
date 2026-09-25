@@ -1,5 +1,6 @@
 mod fixtures;
 
+mod blog;
 mod canonical_host;
 mod compression;
 mod health;

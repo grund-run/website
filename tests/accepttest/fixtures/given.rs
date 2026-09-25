@@ -42,4 +42,28 @@ impl Given {
     pub fn the_redirect_host(&self) -> Option<String> {
         self.testcase.fixture.expect.redirect_host.clone()
     }
+
+    /// Reads the blog index and records every post it marks as a draft.
+    /// Behaviour, not copy: whatever the drafts are called, the index marks
+    /// each with `draft-tag` inside its link.
+    pub async fn the_drafts_the_blog_lists(&self) -> anyhow::Result<Vec<String>> {
+        let fixture = &self.testcase.fixture;
+        let response = client::send(&fixture.origin, "GET", "/blog/", None, &[]).await?;
+        if response.status != 200 {
+            return Ok(Vec::new());
+        }
+        let body = String::from_utf8_lossy(&response.body).into_owned();
+        let drafts: Vec<String> = body
+            .split("<li class=\"post-item\">")
+            .skip(1)
+            .filter(|item| item.contains("draft-tag"))
+            .filter_map(|item| {
+                let start = item.find("href=\"")? + 6;
+                let end = item[start..].find('"')? + start;
+                Some(item[start..end].to_string())
+            })
+            .collect();
+        self.testcase.data().drafts = drafts.clone();
+        Ok(drafts)
+    }
 }
