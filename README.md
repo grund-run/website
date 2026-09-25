@@ -2,8 +2,9 @@
 
 The server behind [grund.sh](https://grund.sh), grund's main site. It serves a static site that
 is built elsewhere and embedded into one static binary at compile time. The
-binary runs on a `scratch` image with no filesystem, no database and no
-outbound connections.
+binary runs on a `scratch` image with no filesystem and no database. Its
+one outbound connection is optional: page views to grund insights, only when
+`GRUND_WEBSITE_INSIGHTS_URL` is set.
 
 `site/` holds the designed page: a feature page, hand-written in HTML and CSS
 in the palette of the grund dashboard design
@@ -136,8 +137,7 @@ the existing homelab clusters, via `kjuulh/kubernetes-app`:
 
 ## Getting traffic here
 
-`DNS (grund/terraform) -> public gateway (SNI passthrough) -> cluster ingress
--> this pod`. TLS terminates in the cluster, with a cert-manager certificate
-per host, so the gateway never sees plaintext. The DNS records live in the
-private `grund/terraform` repo. The gateway routes live in
-`kjuulh/clank-homelab`.
+`DNS -> public gateway (TLS passthrough) -> cluster ingress -> this pod`.
+TLS terminates in the cluster, with a certificate per host, so the gateway
+never sees plaintext. DNS and gateway configuration live outside this
+repository.

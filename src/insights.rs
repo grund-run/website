@@ -5,8 +5,8 @@
 //! path without its query string, the status, the referrer's host, three utm
 //! tags, the user agent and the client address from a configured header.
 //! insights keeps the first four and uses the last two only to count daily
-//! visitors, then drops them (grund/insights docs/design/tracking.md). No
-//! script runs in the browser and nothing is stored on the visitor's device.
+//! visitors, then drops them. No script runs in the browser and nothing is
+//! stored on the visitor's device.
 //!
 //! The request path never waits for this. The middleware builds one small
 //! struct after the response exists and `try_send`s it into a bounded queue.

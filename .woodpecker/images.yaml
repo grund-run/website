@@ -2,8 +2,8 @@
 # that binary. Runs only after ci.yaml passes.
 #
 # Required Woodpecker secret (push to main only; pull requests use none):
-#   registry_token: a git.kjuulh.io token for user kjuulh with package write
-#   access to the grund organisation. Currently the instance-wide secret.
+#   registry_token: a git.kjuulh.io token with package write access to the
+#   grund organisation.
 #
 # One immutable tag, main-${CI_COMMIT_SHA}. kjuulh/woodpecker-forest computes
 # exactly that tag from the commit and pins the release to it, so a rollout
