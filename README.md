@@ -8,8 +8,20 @@ outbound connections.
 `site/` holds the designed page: a feature page, hand-written in HTML and CSS
 in the palette of the grund dashboard design
 (`design/reference/dashboard-overview.png`), with self-hosted Inter and
-JetBrains Mono. [REQUIREMENTS.md](REQUIREMENTS.md) states the contract any
-version of the site has to meet, and what the server guarantees.
+JetBrains Mono.
+
+Any version of the site has to meet this contract; `build.rs` and
+`cargo test` enforce it:
+
+- `index.html` and `404.html` exist at the root.
+- File names use only ASCII letters, digits and `. _ - ~ @ +`, and have a
+  known extension (`content_type` in `build.rs`). Dotfiles are ignored,
+  except under `.well-known/`.
+- Everything under `assets/` is cached for a year, so its name must change
+  when its content does. Everything else revalidates by ETag.
+- It runs under the CSP in `src/api.rs`: everything from this origin, no
+  inline `<script>`, `<style>`, `style=` or `on*=`. Every same-origin link
+  resolves.
 
 ## Run it
 
@@ -41,7 +53,9 @@ Endpoints:
 - `GET /health/live`: `{"status":"ok"}`. Checks nothing.
 - `GET /health/ready`: status, `revision` (the build commit), `site_digest`
   and the file count.
-- Everything else: the site (see REQUIREMENTS.md for the URL mapping).
+- Everything else: the site. `/` and `/dir/` serve `index.html` and
+  `dir/index.html`, `/dir` 308s to `/dir/`, and `/page` serves `page`,
+  `page.html` or `page.sh`. Anything else is `404.html` with status 404.
 
 ## Layout
 
@@ -49,7 +63,7 @@ Endpoints:
 build.rs              walks site/, hashes and precompresses every file, emits the table
 site/                 the static site: index.html, pricing.html, licenses.html, 404.html, styles.css,
                       favicon.svg, assets/ (fonts), licenses/ (full license texts)
-design/               reference/ (the design the site follows), pricing-research.md
+design/reference/     the design the site follows
 src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
 src/site.rs           the embedded table: path resolution, encoding negotiation, cache policy
@@ -66,7 +80,7 @@ Dockerfile.prebuilt   scratch image around the prebuilt binary
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked                 # 42 unit tests + 16 accepttests against a spawned binary
+cargo test --locked                 # 51 unit tests + 18 accepttests against a spawned binary
 ./check.sh                          # the above, plus the accepttests against the static binary in a read-only scratch container
 ```
 
@@ -111,7 +125,7 @@ the existing homelab clusters, via `kjuulh/kubernetes-app`:
 | Env | Host | Replicas | Notes |
 |---|---|---|---|
 | dev | `dev.grund.sh` (+ `dev.grund.run`, redirected) | 1 | `noindex` |
-| prod | `grund.sh` (+ `www.grund.sh`, `grund.run`, `www.grund.run`, redirected) | 2 | grund.run becomes the apps domain (`design/app-domains.md`) |
+| prod | `grund.sh` (+ `www.grund.sh`, `grund.run`, `www.grund.run`, redirected) | 2 | grund.run becomes the apps domain |
 
 ## Getting traffic here
 

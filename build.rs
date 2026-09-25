@@ -10,7 +10,6 @@
 //! It refuses, naming the file, anything that would otherwise surface as a
 //! wrong response in production: a missing `index.html` or `404.html`, an
 //! extension with no known content type, or a path a URL cannot name plainly.
-//! See REQUIREMENTS.md for the contract.
 
 use std::{
     env,
@@ -54,7 +53,7 @@ fn main() {
     for required in ["index.html", "404.html"] {
         if !files.iter().any(|(path, _)| path == required) {
             panic!(
-                "{} has no {required}; the site contract requires it (see REQUIREMENTS.md)",
+                "{} has no {required}; the site contract requires it",
                 site_dir.display()
             );
         }
