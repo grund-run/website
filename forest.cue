@@ -61,6 +61,11 @@ kjuulh: "kubernetes-app": {
 					// insights ignores (not public).
 					GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER: "X-Real-Ip"
 				}
+				// The bearer token insights in dev requires. A Secret created by
+				// hand in the namespace; its value is never in this repository.
+				secret_env: [
+					{name: "GRUND_WEBSITE_INSIGHTS_TOKEN", secret: "grund-insights-ingest", key: "token"},
+				]
 			}
 		}
 
