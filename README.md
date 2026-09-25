@@ -115,7 +115,8 @@ Endpoints:
 build.rs              walks site/, hashes and precompresses every file, emits the table
 blog/posts/           blog posts in markdown; blog/templates/ the post and index pages
 site/                 the static site: index.html, pricing.html, licenses.html, 404.html, styles.css,
-                      favicon.svg, assets/ (fonts), licenses/ (full license texts)
+                      favicon.svg, favicon.ico, apple-touch-icon.png, assets/ (fonts, the mark,
+                      the social card), licenses/ (full license texts)
 design/reference/     the design the site follows
 src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
