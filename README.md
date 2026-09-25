@@ -23,6 +23,10 @@ Any version of the site has to meet this contract; `build.rs` and
   inline `<script>`, `<style>`, `style=` or `on*=`. Every same-origin link
   resolves.
 
+The requirements record, agent notes and design research live in
+[grund/grund-docs](https://git.kjuulh.io/grund/grund-docs/src/branch/main/website)
+under `website/` (private).
+
 ## Run it
 
 ```bash
