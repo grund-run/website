@@ -71,6 +71,31 @@ The post, in CommonMark with tables. `#` headings become `h2`: the title is the 
 - Preview: `GRUND_WEBSITE_BLOG_DRAFTS=true cargo run`, then
   http://127.0.0.1:8080/blog/.
 
+## The newsletter sign-up
+
+A plain form in the home page's closing section, between `<!-- newsletter -->`
+and `<!-- /newsletter -->`. With `GRUND_WEBSITE_NEWSLETTER` off (the default),
+the build's other table has that block removed and the routes answer 404, so
+a deployment without it shows no form. With it on:
+
+- `POST /newsletter` relays the form to grund insights in-cluster
+  (`/v1/newsletter/subscriptions`), with the page's path and utm tags from
+  `Referer` and the client address from the configured header, and answers
+  303 to `/newsletter/thanks`, or to `/newsletter/error` when insights refuses
+  it, is down or is slow (3 s). Never 500.
+- The mailed link, `GET /newsletter/confirm?token=`, shows a button, and only
+  its POST confirms, because mail scanners open links. Then
+  `/newsletter/confirmed?token=` shows the unsubscribe link.
+- `GET`/`POST /newsletter/unsubscribe` is the same shape, and the POST also
+  takes an RFC 8058 one-click request (`?token=`).
+- A form posted with another site's Origin is refused (403). The honeypot
+  field and the rate limit are judged by insights, and nothing logs a body or
+  an address.
+
+The consent checkbox's value, `newsletter-2026-10`, names the wording beside
+it: change the words, change the version. The wording is a draft until it is
+approved.
+
 ## Run it
 
 ```bash
@@ -87,6 +112,7 @@ Configuration is flags or environment variables. There are no config files.
 | `GRUND_WEBSITE_REDIRECT_HOSTS` | empty | Comma-separated hosts that 308 to the canonical origin |
 | `GRUND_WEBSITE_NOINDEX` | `false` | Send `X-Robots-Tag: noindex` (dev) |
 | `GRUND_WEBSITE_BLOG_DRAFTS` | `false` | Serve blog drafts, marked and `noindex` (dev) |
+| `GRUND_WEBSITE_NEWSLETTER` | `false` | Show the newsletter sign-up and serve its routes (needs `GRUND_WEBSITE_INSIGHTS_URL`) |
 | `GRUND_WEBSITE_HSTS_MAX_AGE` | `0` (off) | HSTS max-age in seconds |
 | `GRUND_WEBSITE_REQUEST_TIMEOUT` | `10` | Seconds per request |
 | `GRUND_WEBSITE_SHUTDOWN_GRACE` | `10` | Seconds to drain on SIGTERM, at most 30 |
@@ -122,6 +148,7 @@ src/main.rs           config, tracing, notmad
 src/config.rs         clap Config and its validation
 src/site.rs           the embedded tables and which is served now: path resolution, encoding negotiation, cache policy
 src/blog.rs           markdown posts to pages, index and feed (used by build.rs)
+src/newsletter.rs     the newsletter form relay to grund insights; src/newsletter/*.html its token pages
 src/canonical.rs      alias host -> canonical origin redirects
 src/api.rs            router, security headers, health, file responses
 src/server.rs         the HTTP notmad component
@@ -135,7 +162,7 @@ Dockerfile.prebuilt   scratch image around the prebuilt binary
 ```bash
 cargo fmt --all --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo test --locked                 # 67 unit tests + 23 accepttests against a spawned binary
+cargo test --locked                 # 71 unit tests + 29 accepttests against a spawned binary
 ./check.sh                          # the above, plus the accepttests against the static binary in a read-only scratch container
 ```
 

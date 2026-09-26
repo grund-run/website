@@ -268,6 +268,19 @@
       <div class="actions">
         <a class="button" href="https://github.com/grund-run"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Follow the build on GitHub</a>
       </div>
+      <!-- newsletter -->
+      <form class="signup" action="/newsletter" method="post">
+        <p class="signup-lede">Or get the devlog by email.</p>
+        <div class="signup-row">
+          <label class="sr-only" for="signup-email">Email</label>
+          <input id="signup-email" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="you@example.com">
+          <button class="button ghost" type="submit">Subscribe</button>
+        </div>
+        <label class="signup-hp" aria-hidden="true">Leave this empty <input name="website" tabindex="-1" autocomplete="off"></label>
+        <label class="signup-consent"><input type="checkbox" name="consent" value="newsletter-2026-10" required> Email me grund's devlog, at most twice a month. We send a link to confirm first, and every email has a one-click unsubscribe.</label>
+        <!-- Wording version newsletter-2026-10: a draft, pending approval. Change the words, change the version. -->
+      </form>
+      <!-- /newsletter -->
     </div>
   </section>
 </main>

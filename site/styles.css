@@ -1007,6 +1007,82 @@ h2 .dim {
   justify-content: center;
 }
 
+/* The newsletter sign-up under the closing call to action. A plain form:
+   no script, posted to this origin (form-action 'self'). */
+button.button {
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.button.ghost {
+  border: 1px solid var(--border-strong);
+}
+
+.signup {
+  max-width: 30rem;
+  margin: 2.5rem auto 0;
+  text-align: left;
+}
+
+.signup-lede {
+  margin: 0 0 0.75rem;
+  color: var(--text-2);
+  text-align: center;
+}
+
+.signup-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.signup-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--bg-raised);
+  color: var(--text);
+  font: inherit;
+}
+
+.signup-row input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.signup-consent {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.signup-consent input {
+  margin-top: 0.25rem;
+  accent-color: var(--accent);
+}
+
+/* The honeypot: out of sight and out of the tab order; bots fill it in. */
+.signup-hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@media (max-width: 560px) {
+  .signup-row {
+    flex-direction: column;
+  }
+}
+
 /* ─── Sub-pages: pricing and licenses ────────────────────────────────── */
 
 .nav a[aria-current="page"] {
@@ -1634,4 +1710,9 @@ h2 .dim {
 
 .prose th {
   color: var(--text);
+}
+
+/* Newsletter pages: the sub-page hero, with room below for the action. */
+.newsletter-hero {
+  min-height: 60vh;
 }

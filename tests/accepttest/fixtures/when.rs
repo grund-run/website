@@ -31,6 +31,35 @@ impl When {
         Ok(self)
     }
 
+    /// POSTs a urlencoded form, as a browser on this origin would (Origin
+    /// and Referer set), plus `headers`.
+    pub async fn posting_form(
+        &self,
+        path: &str,
+        body: &str,
+        headers: &[(&str, &str)],
+    ) -> anyhow::Result<&Self> {
+        let fixture = &self.testcase.fixture;
+        let origin = match fixture.expect.canonical_origin.as_str() {
+            "" => format!("http://{}", fixture.origin.authority()),
+            canonical => canonical.to_string(),
+        };
+        let referer = format!("{origin}/?utm_source=accept");
+        let mut all = vec![
+            ("Content-Type", "application/x-www-form-urlencoded"),
+            ("Origin", origin.as_str()),
+            ("Referer", referer.as_str()),
+        ];
+        for (name, value) in headers {
+            all.retain(|(n, _)| !n.eq_ignore_ascii_case(name));
+            all.push((name, value));
+        }
+        let response =
+            client::send_body(&fixture.origin, "POST", path, None, &all, body.as_bytes()).await?;
+        self.testcase.data().last = Some(response);
+        Ok(self)
+    }
+
     /// GETs the asset a Given step found.
     pub async fn requesting_the_asset(&self) -> anyhow::Result<&Self> {
         let path = self.testcase.data().asset.clone();

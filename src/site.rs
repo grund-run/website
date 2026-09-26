@@ -71,7 +71,7 @@ impl Site {
     /// (GRUND_WEBSITE_BLOG_DRAFTS, dev); without, only what is published.
     #[cfg(test)]
     pub fn embedded(drafts: bool) -> Self {
-        Sites::embedded(drafts).at(now())
+        Sites::embedded(drafts, false).at(now())
     }
 
     /// `entries` must be sorted by path; `build.rs` guarantees it for the
@@ -271,11 +271,14 @@ pub struct Sites {
 }
 
 impl Sites {
-    pub fn embedded(drafts: bool) -> Self {
-        let variants = if drafts {
-            embedded::DRAFT_VARIANTS
-        } else {
-            embedded::PUBLIC_VARIANTS
+    /// With `newsletter`, pages keep their `<!-- newsletter -->` blocks (the
+    /// sign-up form, GRUND_WEBSITE_NEWSLETTER); without, the build removed them.
+    pub fn embedded(drafts: bool, newsletter: bool) -> Self {
+        let variants = match (drafts, newsletter) {
+            (false, false) => embedded::PUBLIC_VARIANTS,
+            (true, false) => embedded::DRAFT_VARIANTS,
+            (false, true) => embedded::PUBLIC_VARIANTS_NEWSLETTER,
+            (true, true) => embedded::DRAFT_VARIANTS_NEWSLETTER,
         };
         Self::new(variants)
     }
@@ -514,7 +517,11 @@ pub(crate) mod tests {
     fn the_embedded_html_needs_nothing_the_csp_forbids() {
         let all: Vec<Site> = [false, true]
             .into_iter()
-            .flat_map(|drafts| Sites::embedded(drafts).all().collect::<Vec<_>>())
+            .flat_map(|drafts| {
+                [false, true]
+                    .into_iter()
+                    .flat_map(move |nl| Sites::embedded(drafts, nl).all().collect::<Vec<_>>())
+            })
             .collect();
         for entry in all.iter().flat_map(|site| site.entries()) {
             if !entry.content_type.starts_with("text/html") {
@@ -575,7 +582,11 @@ pub(crate) mod tests {
         let mut broken = Vec::new();
         let all: Vec<Site> = [false, true]
             .into_iter()
-            .flat_map(|drafts| Sites::embedded(drafts).all().collect::<Vec<_>>())
+            .flat_map(|drafts| {
+                [false, true]
+                    .into_iter()
+                    .flat_map(move |nl| Sites::embedded(drafts, nl).all().collect::<Vec<_>>())
+            })
             .collect();
         for site in all {
             for entry in site.entries() {
@@ -693,7 +704,7 @@ pub(crate) mod tests {
     /// listing, so a schedule can never take a page down.
     #[test]
     fn each_scheduled_variant_only_adds_to_the_one_before() {
-        let variants: Vec<Site> = Sites::embedded(false).all().collect();
+        let variants: Vec<Site> = Sites::embedded(false, false).all().collect();
         for pair in variants.windows(2) {
             for entry in pair[0].entries() {
                 let later = pair[1].get(entry.path);

@@ -13,7 +13,7 @@ use axum::{
     http::{HeaderMap, HeaderName, HeaderValue, Method, StatusCode, Uri, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{get, post},
 };
 use tower_http::{
     catch_panic::CatchPanicLayer, set_header::SetResponseHeaderLayer, timeout::TimeoutLayer,
@@ -37,7 +37,15 @@ pub const CSP: &str = "default-src 'none'; script-src 'self'; style-src 'self'; 
 /// Paths the server answers itself, ahead of the site. Site links may point
 /// at them.
 #[cfg(test)]
-pub const SERVER_ROUTES: &[&str] = &["/health/live", "/health/ready", SIGN_IN];
+pub const SERVER_ROUTES: &[&str] = &[
+    "/health/live",
+    "/health/ready",
+    SIGN_IN,
+    "/newsletter",
+    "/newsletter/confirm",
+    "/newsletter/confirmed",
+    "/newsletter/unsubscribe",
+];
 
 /// Sends visitors to the dashboard's login (GRUND_WEBSITE_APP_URL).
 pub const SIGN_IN: &str = "/sign-in";
@@ -69,6 +77,22 @@ pub fn router(state: State) -> Router {
         .route("/health/live", get(live))
         .route("/health/ready", get(ready))
         .route(SIGN_IN, get(sign_in))
+        .route(
+            "/newsletter",
+            post(crate::newsletter::subscribe)
+                .layer(axum::extract::DefaultBodyLimit::max(crate::newsletter::BODY_LIMIT)),
+        )
+        .route(
+            "/newsletter/confirm",
+            get(crate::newsletter::confirm_page).post(crate::newsletter::confirm)
+                .layer(axum::extract::DefaultBodyLimit::max(crate::newsletter::BODY_LIMIT)),
+        )
+        .route("/newsletter/confirmed", get(crate::newsletter::confirmed_page))
+        .route(
+            "/newsletter/unsubscribe",
+            get(crate::newsletter::unsubscribe_page).post(crate::newsletter::unsubscribe)
+                .layer(axum::extract::DefaultBodyLimit::max(crate::newsletter::BODY_LIMIT)),
+        )
         .fallback(serve_site)
         .layer(middleware::from_fn_with_state(state.clone(), canonical_host))
         // Outside the canonical-host redirect, so alias redirects (308) are
@@ -278,7 +302,7 @@ mod tests {
             Config::try_parse_from(std::iter::once("grund-website").chain(args.iter().copied()))
                 .unwrap();
         config.validate().unwrap();
-        router(State::new(config, fixture_sites(), None))
+        router(State::new(config, fixture_sites(), None, None))
     }
 
     async fn send(app: Router, request: Request<Body>) -> (StatusCode, HeaderMap, Vec<u8>) {

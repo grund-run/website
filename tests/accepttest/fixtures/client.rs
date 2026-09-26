@@ -92,6 +92,18 @@ pub async fn send(
     host: Option<&str>,
     headers: &[(&str, &str)],
 ) -> anyhow::Result<Response> {
+    send_body(origin, method, path, host, headers, &[]).await
+}
+
+/// `send` with a request body (Content-Length is added).
+pub async fn send_body(
+    origin: &Origin,
+    method: &str,
+    path: &str,
+    host: Option<&str>,
+    headers: &[(&str, &str)],
+    body: &[u8],
+) -> anyhow::Result<Response> {
     let host = host
         .map(str::to_string)
         .unwrap_or_else(|| origin.authority());
@@ -101,7 +113,12 @@ pub async fn send(
     for (name, value) in headers {
         request.push_str(&format!("{name}: {value}\r\n"));
     }
+    if !body.is_empty() {
+        request.push_str(&format!("Content-Length: {}\r\n", body.len()));
+    }
     request.push_str("\r\n");
+    let mut request = request.into_bytes();
+    request.extend_from_slice(body);
 
     let exchange = async {
         let tcp = TcpStream::connect((origin.host.as_str(), origin.port))
@@ -113,9 +130,9 @@ pub async fn send(
                 .connect(server_name, tcp)
                 .await
                 .context("TLS handshake")?;
-            roundtrip(stream, request.as_bytes()).await?
+            roundtrip(stream, &request).await?
         } else {
-            roundtrip(tcp, request.as_bytes()).await?
+            roundtrip(tcp, &request).await?
         };
         parse(&raw, method == "HEAD")
     };

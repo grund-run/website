@@ -16,6 +16,7 @@ mod blog;
 mod canonical;
 mod config;
 mod insights;
+mod newsletter;
 mod server;
 mod site;
 mod state;
@@ -29,13 +30,14 @@ async fn main() -> anyhow::Result<()> {
     let config = Config::validated()?;
     init_tracing(&config);
 
-    let sites = Sites::embedded(config.blog_drafts);
+    let sites = Sites::embedded(config.blog_drafts, config.newsletter);
     let site = sites.at(site::now());
     tracing::info!(
         revision = site::REVISION,
         site_digest = site.digest(),
         files = site.len(),
         blog_drafts = config.blog_drafts,
+        newsletter = config.newsletter,
         scheduled_ahead = sites.upcoming(site::now()),
         canonical_origin = %config.canonical_origin,
         "serving embedded site"
@@ -60,7 +62,17 @@ async fn main() -> anyhow::Result<()> {
         }
         None => (None, None),
     };
-    let state = State::new(config, sites, insights);
+    let newsletter = match (config.newsletter, &config.insights_url) {
+        (true, Some(url)) => Some(newsletter::Relay::new(
+            url,
+            config.insights_token.clone(),
+            config.insights_site.clone().unwrap_or_default(),
+            config.canonical_origin.clone(),
+            config.insights_client_ip_header.clone(),
+        )),
+        _ => None,
+    };
+    let state = State::new(config, sites, insights, newsletter);
 
     // The listener first, so it stops taking requests before the sender
     // makes its last, bounded send.

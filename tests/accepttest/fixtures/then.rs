@@ -78,6 +78,16 @@ impl Then {
         Ok(self)
     }
 
+    /// The body does not contain `needle`.
+    pub fn body_lacks(&self, needle: &str) -> anyhow::Result<&Self> {
+        let body = self.last()?.body;
+        ensure!(
+            !String::from_utf8_lossy(&body).contains(needle),
+            "the body contains {needle:?}"
+        );
+        Ok(self)
+    }
+
     /// The body links `path` with `href="{path}"`.
     pub fn links_to(&self, path: &str) -> anyhow::Result<&Self> {
         let body = self.last()?.body;

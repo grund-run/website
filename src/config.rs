@@ -47,6 +47,13 @@ pub struct Config {
     #[arg(long, env = "GRUND_WEBSITE_BLOG_DRAFTS", default_value_t = false, action = clap::ArgAction::Set)]
     pub blog_drafts: bool,
 
+    /// Show the newsletter sign-up (the pages' `<!-- newsletter -->` blocks)
+    /// and serve its routes, which forward to grund insights. Needs
+    /// GRUND_WEBSITE_INSIGHTS_URL. Off: the form is not in the pages and the
+    /// routes are 404.
+    #[arg(long, env = "GRUND_WEBSITE_NEWSLETTER", default_value_t = false, action = clap::ArgAction::Set)]
+    pub newsletter: bool,
+
     /// Strict-Transport-Security max-age in seconds; 0 sends no header. Enable
     /// only once HTTPS on every host of this origin is proven: browsers keep
     /// the promise for the whole max-age even if TLS later breaks.
@@ -180,6 +187,10 @@ impl Config {
                 "GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER must be a header name, got {name:?}"
             );
         }
+        anyhow::ensure!(
+            !self.newsletter || self.insights_url.is_some(),
+            "GRUND_WEBSITE_NEWSLETTER needs GRUND_WEBSITE_INSIGHTS_URL: grund insights keeps the sign-ups"
+        );
         Ok(())
     }
 
