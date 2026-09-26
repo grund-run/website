@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 img=grund-website:check
 name=grund-website-check
 port=${PORT:-8097}
-rust_image=rust:1.98-alpine
+rust_image=rust:1.98.1-alpine3.24
 
 cleanup() { docker rm -f "$name" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
