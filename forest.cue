@@ -51,6 +51,9 @@ kjuulh: "kubernetes-app": {
 					// Blog drafts (draft: true in blog/posts/) are served here only,
 					// marked as drafts and noindex. Prod serves published posts.
 					GRUND_WEBSITE_BLOG_DRAFTS: "true"
+					// The newsletter sign-up, relayed to insights in dev. Off in
+					// prod until insights and grund mail run there.
+					GRUND_WEBSITE_NEWSLETTER: "true"
 					// The nav's "Sign in" goes here (/sign-in, src/api.rs). Prod
 					// sets none until the dashboard has a prod deployment, so
 					// there /sign-in is a 404.
