@@ -1,7 +1,25 @@
-# Fast gates for every push and pull request: formatting, lints as errors, the
-# unit tests, and the accepttests against a binary cargo spawns. images.yaml
-# runs the accepttests again against the release binary it packages, because
-# that is the artifact that ships and Woodpecker workflows share no workspace.
+# Every gate, and the image, in one workflow, so the steps share one
+# workspace and run side by side:
+#
+#   lint ────────────────┐
+#   test ────┐           ├─ image-publish (push to main) / image-dry-run (PR)
+#   release ─┴─ contract ┘
+#
+# `test` runs the unit tests and the accepttests against a binary cargo
+# spawns. `release` builds the static binary that ships. `contract` runs the
+# accepttest binary `test` already compiled against that staged release
+# binary, so the artifact that ships is the one the accepttests assert
+# against, and the accepttests are compiled once. The image is published only
+# when every gate passed.
+#
+# Required Woodpecker secret (push to main only; pull requests use none):
+#   registry_token: a git.kjuulh.io token with package write access to the
+#   grund organisation.
+#
+# One immutable tag, main-${CI_COMMIT_SHA}. kjuulh/woodpecker-forest computes
+# exactly that tag from the commit and pins the release to it, so a rollout
+# cannot find its image if this tag stops being published. There is no latest
+# or main tag: a moving tag gives a rollback nothing to roll back to.
 
 when:
   - event: push
@@ -13,15 +31,96 @@ labels:
   platform: linux/amd64
 
 steps:
-  check:
-    # The same image images.yaml builds the shipped binary in, so a toolchain
-    # difference cannot pass here and fail there.
+  lint:
+    # The same image the shipped binary is built in, so a toolchain
+    # difference cannot pass here and fail there. Its own target directory:
+    # cargo locks a target directory per build, and lint runs beside test.
     image: rust:1.98-alpine
+    depends_on: []
     environment:
       CARGO_TERM_COLOR: always
+      CARGO_TARGET_DIR: target/lint
     commands:
       - apk add --no-cache musl-dev
       - rustup component add rustfmt clippy
       - cargo fmt --all --check
       - cargo clippy --all-targets --locked -- -D warnings
+
+  test:
+    image: rust:1.98-alpine
+    depends_on: []
+    environment:
+      CARGO_TERM_COLOR: always
+    commands:
+      - apk add --no-cache musl-dev
+      # Build every test binary first, and keep the accepttest binary:
+      # `contract` runs that same file against the release binary. The same
+      # invocation as the run below, so the run compiles nothing.
+      - mkdir -p .accept
+      - cargo test --locked --no-run --message-format=json-render-diagnostics > .accept/build.json
+      - grep '"reason":"compiler-artifact"' .accept/build.json | grep '"kind":\["test"\]' | grep '"name":"tests"' | sed -n 's/.*"executable":"\([^"]*\)".*/\1/p' > .accept/path
+      - test "$$(wc -l < .accept/path)" -eq 1 || { echo "expected one accepttest binary, found:"; cat .accept/path; exit 1; }
+      - cp "$$(cat .accept/path)" .accept/tests
       - cargo test --locked
+
+  release:
+    # rust:*-alpine targets musl natively: the release binary is static, which
+    # is what lets it run on scratch. build.rs compiles CI_COMMIT_SHA into
+    # /health/ready as "revision".
+    image: rust:1.98-alpine
+    depends_on: []
+    environment:
+      CARGO_TERM_COLOR: always
+    commands:
+      - apk add --no-cache musl-dev binutils
+      - cargo build --locked --release
+      - if readelf -d target/release/grund-website | grep -q NEEDED; then echo "grund-website is dynamically linked; scratch cannot run it"; exit 1; fi
+      # Stage the binary first and run the staged file, so the process the
+      # accepttests assert against is byte for byte the one that gets packaged.
+      - mkdir -p .image && cp target/release/grund-website .image/grund-website
+
+  contract:
+    # The accepttest binary `test` compiled and ran against a spawned binary,
+    # pointed at the staged release binary. The harness is a black-box HTTP
+    # client, so it does not need to be compiled in release itself.
+    image: rust:1.98-alpine
+    depends_on: [test, release]
+    commands:
+      - GRUND_WEBSITE_LISTEN=127.0.0.1:8080 GRUND_WEBSITE_REDIRECT_HOSTS=www.grund.sh ./.image/grund-website > server.log 2>&1 &
+      - GRUND_WEBSITE_ACCEPT_URL=http://127.0.0.1:8080 GRUND_WEBSITE_ACCEPT_REDIRECT_HOST=www.grund.sh ./.accept/tests || { echo "--- server log"; cat server.log; exit 1; }
+
+  # A broken Dockerfile fails the pull request that broke it, not the next
+  # push to main. Builds, never pushes, and needs no secret.
+  image-dry-run:
+    image: woodpeckerci/plugin-docker-buildx:5
+    depends_on: [lint, contract]
+    when:
+      - event: pull_request
+    settings:
+      dockerfile: Dockerfile.prebuilt
+      context: .image
+      repo: git.kjuulh.io/grund/website
+      platforms: linux/amd64
+      dry_run: true
+      auto_tag: false
+      tags: ci-${CI_COMMIT_SHA_SHORT}
+
+  image-publish:
+    image: woodpeckerci/plugin-docker-buildx:5
+    depends_on: [lint, contract]
+    when:
+      - event: push
+        branch: main
+      - event: manual
+    settings:
+      registry: git.kjuulh.io
+      repo: git.kjuulh.io/grund/website
+      dockerfile: Dockerfile.prebuilt
+      context: .image
+      username: kjuulh
+      password:
+        from_secret: registry_token
+      platforms: linux/amd64
+      auto_tag: false
+      tags:
+        - main-${CI_COMMIT_SHA}
