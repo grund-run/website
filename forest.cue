@@ -97,6 +97,12 @@ kjuulh: "kubernetes-app": {
 					GRUND_WEBSITE_INSIGHTS_URL:              "http://grund-insights:8081"
 					GRUND_WEBSITE_INSIGHTS_CLIENT_IP_HEADER: "X-Real-Ip"
 				}
+				// The bearer token insights in prod requires, as in dev. A Secret
+				// created by hand in the namespace; its value is never in this
+				// repository.
+				secret_env: [
+					{name: "GRUND_WEBSITE_INSIGHTS_TOKEN", secret: "grund-insights-ingest", key: "token"},
+				]
 			}
 		}
 	}
