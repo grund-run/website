@@ -54,9 +54,7 @@ kjuulh: "kubernetes-app": {
 					// The newsletter sign-up, relayed to insights in dev. Off in
 					// prod until insights and grund mail run there.
 					GRUND_WEBSITE_NEWSLETTER: "true"
-					// The nav's "Sign in" goes here (/sign-in, src/api.rs). Prod
-					// sets none until the dashboard has a prod deployment, so
-					// there /sign-in is a 404.
+					// The nav's "Sign in" goes here (/sign-in, src/api.rs).
 					GRUND_WEBSITE_APP_URL: "https://dev.app.grund.sh"
 					// Page views for grund insights (src/insights.rs). The
 					// namespace-local Service name, not a hostname: in-cluster,
@@ -91,6 +89,9 @@ kjuulh: "kubernetes-app": {
 				env_vars: {
 					GRUND_WEBSITE_CANONICAL_ORIGIN: "https://grund.sh"
 					GRUND_WEBSITE_REDIRECT_HOSTS:   "www.grund.sh,grund.run,www.grund.run"
+					// The nav's "Sign in" goes to the dashboard's login (live since
+					// 2026-10-12).
+					GRUND_WEBSITE_APP_URL: "https://app.grund.sh"
 					// Page views for grund insights (src/insights.rs), as in dev:
 					// the namespace-local Service, plain http, in-cluster only.
 					GRUND_WEBSITE_INSIGHTS_URL:              "http://grund-insights:8081"
