@@ -41,6 +41,7 @@ pub const SERVER_ROUTES: &[&str] = &[
     "/health/live",
     "/health/ready",
     SIGN_IN,
+    SIGN_UP,
     "/newsletter",
     "/newsletter/confirm",
     "/newsletter/confirmed",
@@ -49,6 +50,9 @@ pub const SERVER_ROUTES: &[&str] = &[
 
 /// Sends visitors to the dashboard's login (GRUND_WEBSITE_APP_URL).
 pub const SIGN_IN: &str = "/sign-in";
+
+/// Sends visitors to the dashboard's sign-up (GRUND_WEBSITE_APP_URL).
+pub const SIGN_UP: &str = "/sign-up";
 
 const PERMISSIONS_POLICY: &str =
     "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()";
@@ -77,6 +81,7 @@ pub fn router(state: State) -> Router {
         .route("/health/live", get(live))
         .route("/health/ready", get(ready))
         .route(SIGN_IN, get(sign_in))
+        .route(SIGN_UP, get(sign_up))
         .route(
             "/newsletter",
             post(crate::newsletter::subscribe)
@@ -161,13 +166,33 @@ async fn ready(extract::State(state): extract::State<State>) -> Response {
 /// A 302, never cached: where the dashboard lives is configuration, and a
 /// cached permanent redirect would outlive a change to it.
 async fn sign_in(
-    extract::State(state): extract::State<State>,
+    state: extract::State<State>,
     method: Method,
     uri: Uri,
     headers: HeaderMap,
 ) -> Response {
+    to_app(state, method, uri, headers, "/login").await
+}
+
+/// As sign_in, to the dashboard's sign-up page.
+async fn sign_up(
+    state: extract::State<State>,
+    method: Method,
+    uri: Uri,
+    headers: HeaderMap,
+) -> Response {
+    to_app(state, method, uri, headers, "/signup").await
+}
+
+async fn to_app(
+    extract::State(state): extract::State<State>,
+    method: Method,
+    uri: Uri,
+    headers: HeaderMap,
+    path: &str,
+) -> Response {
     match &state.config.app_url {
-        Some(app) => match HeaderValue::try_from(format!("{app}/login")) {
+        Some(app) => match HeaderValue::try_from(format!("{app}{path}")) {
             Ok(location) => no_store((StatusCode::FOUND, [(header::LOCATION, location)])),
             Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
         },
@@ -390,6 +415,21 @@ mod tests {
         assert_eq!(header(&headers, "content-length"), "13");
         assert_eq!(header(&headers, "content-type"), "text/html; charset=utf-8");
         assert!(body.is_empty());
+    }
+
+    #[tokio::test]
+    async fn sign_up_sends_visitors_to_the_dashboard_signup_uncached() {
+        let (status, headers, _) = send(
+            app(&["--app-url", "https://app.example.com"]),
+            get("/sign-up"),
+        )
+        .await;
+        assert_eq!(status, StatusCode::FOUND);
+        assert_eq!(
+            header(&headers, "location"),
+            "https://app.example.com/signup"
+        );
+        assert_eq!(header(&headers, "cache-control"), "no-store");
     }
 
     #[tokio::test]
