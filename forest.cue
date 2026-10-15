@@ -25,7 +25,7 @@ _destinationTypes: {
 dependencies: {
 	"forest/deployment": version:        "0.3.0"
 	"kjuulh/kubernetes-app": version:    "0.1.13"
-	"kjuulh/woodpecker-forest": version: "0.1.10"
+	"kjuulh/woodpecker-forest": version: "0.1.14"
 }
 
 forest: deployment: enabled: true
@@ -162,6 +162,25 @@ kjuulh: "woodpecker-forest": config: {
 	manual_prod_job: false
 	// Every gate and the image are one workflow, .woodpecker/ci.yaml.
 	depends_on: ["ci"]
+	// The shared CI cache (grund-docs design/ci-cache.md). lint, test and
+	// release read the public cache without a key: they restore their target
+	// snapshot and run sccache inside it. A generated push-only cache-save
+	// step writes them all with ci_cache_public. This repository is public,
+	// so the client comes from its public package (sha256-pinned) and the
+	// workflow names no internal address; anything failing means an uncached
+	// build, and cache-save never fails the pipeline.
+	ci_cache: {
+		enabled:        true
+		private:        false
+		bootstrap:      true
+		client_version: "0.2.0"
+		client_sha256:  "9a8b7b692aaf73f6499de5bca19f15f7609783db03b65bdca252127fea17d36a"
+		steps: [
+			{name: "lint", preset: "cargo"},
+			{name: "test", preset: "cargo"},
+			{name: "release", preset: "cargo"},
+		]
+	}
 }
 
 commands: {
