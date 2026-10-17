@@ -384,7 +384,7 @@ h1 {
   margin-top: 2rem;
 }
 
-.install code {
+.install > code {
   display: block;
   padding: 0.85rem 1.1rem;
   border: 1px solid var(--border-strong);
@@ -397,7 +397,7 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .install code {
+  .install > code {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }

@@ -96,6 +96,23 @@ The consent checkbox's value, `newsletter-2026-10`, names the wording beside
 it: change the words, change the version. The wording is a draft until it is
 approved.
 
+## Installer
+
+`/install` and `/install.sh` serve the same readable POSIX shell script.
+It installs a checksummed Linux alpha release from the public
+`git.kjuulh.io` registry; `--version` pins one, otherwise the Gitea release
+list includes prereleases when resolving the newest release.
+No version is embedded in the website, so publishing a release does not
+require redeploying it.
+
+The default is the CLI and `grund login`. `--domain` is the self-hosted
+dashboard path (Linux, root, systemd and Docker Compose v2): server and
+HTTPS first, owner setup then local machine enrollment. It never deploys an
+app from the current directory. Installation flags, changed files and
+checksum trust limits are documented in the script's header and `--help`.
+The homepage labels this alpha and links the script before asking users to
+run it. Until a release exists, it refuses without installing a binary.
+
 ## Run it
 
 ```bash
