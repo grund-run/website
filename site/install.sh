@@ -2,7 +2,7 @@
 # Install the grund alpha CLI. Read this script before running it.
 #
 #   curl -fsSL https://grund.sh/install | sh
-#   curl -fsSL https://grund.sh/install | sh -s -- --version v0.0.0-alpha.2
+#   curl -fsSL https://grund.sh/install | sh -s -- --version v0.0.0-alpha.3
 #
 # --domain grund.example.com installs the self-hosted dashboard on this Linux
 # machine, not an app from the current directory. It requires root, systemd
@@ -24,7 +24,7 @@ usage() {
   cat <<'HELP'
 grund alpha installer
 
-  --version VERSION   Pin a release, for example v0.0.0-alpha.2 (default: newest release, including alphas)
+  --version VERSION   Pin a release, for example v0.0.0-alpha.3 (default: newest release, including alphas)
   --bin-dir DIR       Binary directory (default: ~/.local/bin, /usr/local/bin as root)
   --domain NAME       Self-host the dashboard with HTTPS on this Linux machine
   --code CODE         Connect this machine after creating the instance owner
