@@ -59,9 +59,9 @@ The post, in CommonMark with tables. `#` headings become `h2`: the title is the 
   the newest rendering whose moment has passed. The post, its index entry and
   its feed entry appear on the first request after the moment. Nothing of the
   post is in what is served before it, and no rebuild or redeploy happens at
-  the moment. The image must be deployed before then, and a promotion to prod
-  is still a person's step. Where drafts are on, a scheduled post shows at
-  once, marked "Scheduled". `/health/ready`'s `site_digest` changes at the
+  that moment. The image must be deployed before then. Where drafts are on,
+  a scheduled post shows at once, marked "Scheduled". `/health/ready`'s
+  `site_digest` changes at the
   moment, which is how to prove from outside that it happened.
 - **Raw HTML in a post is shown as text,** never passed through, so a post
   cannot add script or style the CSP forbids. Images go in
@@ -214,8 +214,9 @@ Woodpecker (`ci.git.kjuulh.io`, repo `grund/website`):
 Releases go to the forest instance at **forest.kjuulh.io** (project
 `kjuulh/grund-website`). The CLI and CI use its API endpoint,
 `https://api.forest.kjuulh.io`. Where a staged release goes is decided by the
-forest project's triggers, not by CI. Dev is automatic. **Production is promoted by a person**, after
-checking the image by digest and running the accepttests against dev.
+forest project's triggers, not by CI. Dev and production roll out
+automatically. A main push can publish content without a separate promotion;
+coordinate it before pushing.
 
 `forest.cue` deploys through the `kjuulh` organisation's Flux destinations on
 the existing homelab clusters, via `kjuulh/kubernetes-app`:
