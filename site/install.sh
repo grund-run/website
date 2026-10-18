@@ -1,14 +1,12 @@
 #!/bin/sh
-# Install the grund alpha CLI. Read this script before running it.
+# Download the grund CLI; machine setup belongs to `grund install`.
 #
 #   curl -fsSL https://grund.sh/install | sh
 #   curl -fsSL https://grund.sh/install | sh -s -- --version v0.0.0-alpha.3
 #
-# --domain grund.example.com installs the self-hosted dashboard on this Linux
-# machine, not an app from the current directory. It requires root, systemd
-# and Docker Compose v2. Point the name at this machine and open TCP 443 first.
-# Create the owner using the printed command, then obtain a machine code from
-# its Machines page and rerun with --domain NAME --code CODE to connect it.
+# --domain downloads the CLI, then invokes `grund install --domain NAME`.
+# Installation requires Linux, root, systemd and Docker Compose v2. Read
+# `grund install --help` for the host changes. No sudo is invoked here.
 #
 # Downloads use the public git.kjuulh.io registry and its SHA256SUMS over HTTPS.
 # Checksums detect corruption, not a compromised registry; releases are not
@@ -22,18 +20,19 @@ fail() { printf 'grund install: %s\n' "$*" >&2; exit 1; }
 
 usage() {
   cat <<'HELP'
-grund alpha installer
+grund CLI bootstrap
 
-  --version VERSION   Pin a release, for example v0.0.0-alpha.3 (default: newest release, including alphas)
+  --version VERSION   Pin a release, for example v0.0.0-alpha.4
+  --channel CHANNEL   stable or alpha (new installs: alpha; existing installs: their channel)
   --bin-dir DIR       Binary directory (default: ~/.local/bin, /usr/local/bin as root)
-  --domain NAME       Self-host the dashboard with HTTPS on this Linux machine
-  --code CODE         Connect this machine after creating the instance owner
-  --no-vms            Do not install Firecracker for the local machine
+  --domain NAME       After downloading, run grund install --domain NAME
+  --code CODE         Pass the one-time machine code to grund install
+  --no-vms            Pass --no-vms to grund install
   --help              Show this help without changing anything
 
-Self-hosting requires root, systemd and Docker Compose v2. It stores its
-configuration in /opt/grund and persistent data in Docker volumes. It does not
-configure DNS, mail, backups or deploy an app. No sudo is invoked for you.
+Without --domain, this downloads only the CLI. With --domain, the downloaded
+CLI owns systemd setup and installation. Reinstalling preserves the server
+image; changing that image needs an update-capable CLI release and a backup.
 HELP
 }
 
@@ -60,57 +59,20 @@ fetch() {
   done < "$work/SHA256SUMS"
   [ "${#expected}" -eq 64 ] || fail "release $version has no unambiguous checksum for $file"
   case "$expected" in *[!0-9a-f]*) fail "invalid checksum for $file" ;; esac
-  curl --proto '=https' --tlsv1.2 -fsSL -o "$work/$file" "$base/$file" || fail "could not download $base/$file"
+  curl --proto '=https' --tlsv1.2 --connect-timeout 10 --max-time 300 --max-filesize 268435456 -fsS -o "$work/$file" "$base/$file" || fail "could not download $base/$file"
   [ "$(checksum "$work/$file")" = "$expected" ] || fail "$file failed SHA-256 verification; nothing from this file was installed"
 }
 
-self_host() {
-  root=/opt/grund
-  mkdir -p "$root"
-  if [ -e "$root/.env" ]; then
-    [ -f "$root/.installer-domain" ] || fail "$root/.env is not managed by this installer; keep using your existing deployment"
-    [ "$(cat "$root/.installer-domain")" = "$domain" ] || fail "this machine is configured for another domain; edit $root/.env deliberately instead"
-    grep -q '^GRUND_IMAGE=' "$root/.env" || fail "$root/.env no longer has the managed GRUND_IMAGE setting"
-    sed "s|^GRUND_IMAGE=.*|GRUND_IMAGE=$image|" "$root/.env" > "$work/.env"
-  else
-    umask 077
-    printf 'GRUND_DOMAIN=%s\nGRUND_IMAGE=%s\nGRUND_PULL_POLICY=missing\n' "$domain" "$image" > "$work/.env"
-  fi
-  install -m 0600 "$work/.env" "$root/.env"
-  printf '%s\n' "$domain" > "$root/.installer-domain"
-  install -m 0644 "$work/compose.yaml" "$root/compose.yaml"
-  install -m 0755 "$work/agent-install.sh" "$root/agent-install.sh"
-  printf '%s\n' "Starting grund $version at https://$domain (TCP 443 must reach this machine)."
-  docker compose --project-directory "$root" up --no-build -d --wait --wait-timeout 180 || fail "server did not become healthy; inspect: docker compose --project-directory $root logs"
-  set -- --url "https://$domain" --binary "$bin_dir/grund"
-  [ -z "$no_vms" ] || set -- "$@" --no-vms
-  if [ -n "$code" ]; then
-    set -- "$@" --code "$code"
-  else
-    set -- "$@" --prepare-only
-  fi
-  sh "$root/agent-install.sh" "$@"
-  printf '\nSelf-hosted dashboard: https://%s\n' "$domain"
-  if [ -z "$code" ] && [ ! -f /var/lib/grund/agent/machine.json ]; then
-    printf '%s\n' 'Create the owner with the one-time link printed by:'
-    printf '  docker compose --project-directory %s exec grund /grund setup-link\n' "$root"
-    printf '%s\n' "Then use its Machines page to obtain a code and connect this machine:"
-    printf '  curl -fsSL https://grund.sh/install | sh -s -- --version %s --domain %s --code CODE\n' "$version" "$domain"
-    printf '%s\n' 'The local machine is installed but not connected until that step succeeds.'
-  fi
-  printf 'Sign in to this instance: grund login https://%s\n' "$domain"
-  printf '%s\n' 'Configure mail and back up both the grund-data and grund-postgres volumes before depending on it.'
-}
-
 main() {
-  version= domain= code= bin_dir= no_vms=
+  version= channel= domain= code= bin_dir= no_vms=
   while [ "$#" -gt 0 ]; do
     case "$1" in
       --help|-h) usage; return ;;
-      --version|--domain|--code|--bin-dir)
+      --version|--channel|--domain|--code|--bin-dir)
         [ "$#" -ge 2 ] && [ -n "$2" ] || fail "$1 needs a value"
         case "$1" in
           --version) version=$2 ;;
+          --channel) channel=$2 ;;
           --domain) domain=$2 ;;
           --code) code=$2 ;;
           --bin-dir) bin_dir=$2 ;;
@@ -131,43 +93,62 @@ main() {
     else [ -n "${HOME:-}" ] || fail 'HOME is not set'; bin_dir=$HOME/.local/bin; fi
   fi
   case "$bin_dir" in /*) ;; *) fail '--bin-dir must be an absolute path' ;; esac
-  if [ -n "$domain" ]; then
-    [ "$os" = linux ] && [ "$(id -u)" = 0 ] || fail '--domain requires Linux and root; run the reviewed script as root'
-    [ "$bin_dir" = /usr/local/bin ] || fail '--domain installs the service binary in /usr/local/bin'
-    printf '%s\n' "$domain" | grep -Eq '^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]*[a-zA-Z0-9])?$' || fail '--domain takes a DNS name, without https://, a port or a path'
-    command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ] || fail '--domain needs a running systemd system'
-    docker compose version >/dev/null 2>&1 || fail '--domain requires Docker Engine and Docker Compose v2; install them first'
-    docker info >/dev/null 2>&1 || fail 'Docker Engine is not available to this user'
-  fi
   command -v curl >/dev/null 2>&1 || fail 'curl is required'
   command -v sha256sum >/dev/null 2>&1 || command -v shasum >/dev/null 2>&1 || fail 'sha256sum or shasum is required'
   command -v install >/dev/null 2>&1 || fail 'install is required (coreutils)'
   work=$(mktemp -d)
   trap 'rm -rf "$work"; if [ -n "${staged:-}" ]; then rm -f "$staged"; fi' EXIT
   trap 'exit 1' HUP INT TERM
+  if [ -z "$channel" ]; then
+    channel=alpha
+    if [ -x "$bin_dir/grund" ]; then
+      installed=$("$bin_dir/grund" --version 2>/dev/null || true)
+      case "$installed" in
+        "grund v"*)
+          installed=${installed#grund }
+          if valid_version "$installed"; then
+            case "$installed" in *-alpha.*) channel=alpha ;; *) channel=stable ;; esac
+          fi ;;
+      esac
+    fi
+  fi
+  case "$channel" in stable|alpha) ;; *) fail '--channel is stable or alpha' ;; esac
   if [ -z "$version" ]; then
-    # Gitea's /releases/latest ignores prereleases. Public list order is newest
-    # first; choose its first supported tag, including alpha releases.
-    curl --proto '=https' --tlsv1.2 -fsSL 'https://git.kjuulh.io/api/v1/repos/grund/grund/releases?limit=100' -o "$work/releases.json" || fail 'could not resolve the newest release; use --version to pin one'
-    tr ',' '\n' < "$work/releases.json" | sed -n 's/^[[:space:]]*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' > "$work/tags"
-    while IFS= read -r tag; do
-      if valid_version "$tag"; then version=$tag; break; fi
-    done < "$work/tags"
-    [ -n "$version" ] || fail 'no downloadable grund release is published yet; nothing was installed'
+    : > "$work/candidates"
+    page=1
+    while :; do
+      [ "$page" -le 100 ] || fail 'release list exceeds 100 pages; use --version'
+      curl --proto '=https' --tlsv1.2 --connect-timeout 10 --max-time 60 -fsS \
+        "https://git.kjuulh.io/api/v1/repos/grund/grund/releases?limit=100&page=$page" \
+        -o "$work/releases.json" || fail 'could not resolve releases; use --version'
+      tr ',' '\n' < "$work/releases.json" | sed -n 's/^[[:space:]]*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' > "$work/tags"
+      [ -s "$work/tags" ] || break
+      while IFS= read -r tag; do
+        valid_version "$tag" || continue
+        case "$channel:$tag" in stable:*-alpha.*) continue ;; esac
+        printf '%s\n' "$tag" >> "$work/candidates"
+      done < "$work/tags"
+      page=$((page + 1))
+    done
+    # Numeric fields, not publication order or lexical alpha numbering.
+    sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)-alpha\.([0-9]+)$/\1.\2.\3.0.\4 &/; t; s/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\1.\2.\3.1.0 &/' "$work/candidates" |
+      LC_ALL=C sort -t . -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n > "$work/ordered"
+    while read -r key tag; do version=$tag; done < "$work/ordered"
+    [ -n "$version" ] || fail "no downloadable $channel release is published; nothing was installed"
   fi
   case "$version" in *-alpha.*) printf 'Installing grund %s — alpha software. Back up data; expect changes.\n' "$version" ;; *) printf 'Installing grund %s\n' "$version" ;; esac
   base=https://git.kjuulh.io/api/packages/grund/generic/grund/$version
-  curl --proto '=https' --tlsv1.2 -fsSL -o "$work/SHA256SUMS" "$base/SHA256SUMS" || fail "release $version has no published SHA256SUMS"
+  curl --proto '=https' --tlsv1.2 --connect-timeout 10 --max-time 60 --max-filesize 1048576 -fsS -o "$work/SHA256SUMS" "$base/SHA256SUMS" || fail "release $version has no published SHA256SUMS"
   artifact=grund-$os-$arch
   fetch "$artifact"
   chmod 0755 "$work/$artifact"
-  "$work/$artifact" --version
-  if [ -n "$domain" ]; then
-    fetch compose.yaml
-    fetch agent-install.sh
-    fetch image-digest.txt
-    image=$(cat "$work/image-digest.txt")
-    printf '%s\n' "$image" | grep -Eq '^git\.kjuulh\.io/grund/grund@sha256:[0-9a-f]{64}$' || fail 'release names no valid public image digest'
+  reported=$("$work/$artifact" --version) || fail 'downloaded executable could not report its version'
+  [ "$reported" = "grund $version" ] || fail "downloaded executable does not report grund $version"
+  printf '%s\n' "$reported"
+  can_install=
+  if "$work/$artifact" install --help >/dev/null 2>&1; then can_install=1; fi
+  if [ -n "$domain" ] && [ -z "$can_install" ]; then
+    fail "release $version has no grund install command; choose a newer release"
   fi
   mkdir -p "$bin_dir"
   staged=$(mktemp "$bin_dir/.grund.XXXXXXXX")
@@ -176,9 +157,24 @@ main() {
     fail "could not replace $bin_dir/grund"
   fi
   printf 'Installed %s (SHA-256 verified).\n' "$bin_dir/grund"
-  case ":${PATH:-}:" in *":$bin_dir:"*) ;; *) printf 'Add to PATH: export PATH="%s:$PATH"\n' "$bin_dir" ;; esac
-  if [ -n "$domain" ]; then self_host
-  else printf '\nNext: grund login\nHosted dashboard: https://app.grund.sh\n'; fi
+  case ":${PATH:-}:" in *":$bin_dir:"*) ;; *)
+    quoted_directory=$(printf '%s:\n' "$bin_dir" | sed "s/'/'\\\\''/g")
+    printf "Add to PATH: export PATH='%s'\"\$PATH\"\n" "$quoted_directory"
+    ;; esac
+  if [ -n "$domain" ]; then
+    set -- install --domain "$domain" --version "$version"
+    [ -z "$code" ] || set -- "$@" --code "$code"
+    [ -z "$no_vms" ] || set -- "$@" --no-vms
+    "$bin_dir/grund" "$@"
+  else
+    printf '\nNext: grund login\nHosted dashboard: https://app.grund.sh\n'
+    if [ -n "$can_install" ]; then
+      quoted_binary=$(printf '%s/grund\n' "$bin_dir" | sed "s/'/'\\\\''/g")
+      printf "For your own dashboard: sudo '%s' install --domain grund.example.com\n" "$quoted_binary"
+    else
+      printf '%s\n' 'This release provides the CLI but not the managed grund install command.'
+    fi
+  fi
 }
 
 main "$@"

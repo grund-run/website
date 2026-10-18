@@ -98,20 +98,25 @@ approved.
 
 ## Installer
 
-`/install` and `/install.sh` serve the same readable POSIX shell script.
-It installs a checksummed Linux alpha release from the public
-`git.kjuulh.io` registry; `--version` pins one, otherwise the Gitea release
-list includes prereleases when resolving the newest release.
-No version is embedded in the website, so publishing a release does not
-require redeploying it.
+`/install` and `/install.sh` serve the same readable POSIX shell bootstrap.
+It downloads only the CLI, verifies its public registry SHA-256 and reported
+version, then replaces the executable atomically. HTTPS and registry
+checksums are the trust root; releases are not independently signed.
 
-The default is the CLI and `grund login`. `--domain` is the self-hosted
-dashboard path (Linux, root, systemd and Docker Compose v2): server and
-HTTPS first, owner setup then local machine enrollment. It never deploys an
-app from the current directory. Installation flags, changed files and
-checksum trust limits are documented in the script's header and `--help`.
-The homepage labels this alpha and links the script before asking users to
-run it. Until a release exists, it refuses without installing a binary.
+New installations use the alpha channel, ordered numerically across stable
+releases and alphas. An existing release keeps its stable or alpha channel;
+`--channel stable|alpha` chooses one, and `--version v0.0.0-alpha.5` pins a
+download. A missing stable release does not fall back to alpha. No version
+is embedded in the website.
+
+`--domain` invokes the downloaded `grund install`; the shell no longer owns
+Compose or systemd setup. Managed installation is present in alpha.5, not
+alpha.4 and earlier. It needs Linux, root, systemd and Docker Compose v2:
+dashboard and HTTPS first, owner setup then machine enrollment. Reinstall
+preserves the server image, configuration and identity; it is not an upgrade
+and never deploys an app. Flags and retained paths are in `grund install
+--help` and `grund uninstall --help`. The homepage labels this alpha and
+links the script before asking users to run it.
 
 ## Run it
 
