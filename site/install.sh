@@ -5,8 +5,9 @@
 #   curl -fsSL https://grund.sh/install | sh -s -- --version v0.0.0-alpha.3
 #
 # --domain downloads the CLI, then invokes `grund install --domain NAME`.
-# Installation requires Linux, root, systemd and Docker Compose v2. Read
-# `grund install --help` for the host changes. No sudo is invoked here.
+# Server setup requires Linux, root and systemd. Current releases install
+# missing Docker tools from Debian/Ubuntu packages; other systems need
+# Docker Engine and Compose v2 first. No sudo is invoked here.
 #
 # Downloads use the public git.kjuulh.io registry and its SHA256SUMS over HTTPS.
 # Checksums detect corruption, not a compromised registry; releases are not
@@ -167,12 +168,30 @@ main() {
     [ -z "$no_vms" ] || set -- "$@" --no-vms
     "$bin_dir/grund" "$@"
   else
-    printf '\nNext: grund login\nHosted dashboard: https://app.grund.sh\n'
-    if [ -n "$can_install" ]; then
+    if [ -n "$can_install" ] && [ "$os" = linux ]; then
       quoted_binary=$(printf '%s/grund\n' "$bin_dir" | sed "s/'/'\\\\''/g")
-      printf "For your own dashboard: sudo '%s' install --domain grund.example.com\n" "$quoted_binary"
+      elevation='sudo '
+      [ "$(id -u)" != 0 ] || elevation=
+      case "$version" in
+        v0.0.0-alpha.[1-9])
+          printf "\nNext: %s'%s' install --domain grund.example.com\n" "$elevation" "$quoted_binary"
+          ;;
+        *)
+          if [ "$version" = v0.0.0-alpha.10 ]; then
+            printf '\nOn fresh Debian 13, this old release needs docker.io, docker-cli and docker-compose installed first. Choose alpha.11 or newer for automatic setup.\n'
+          fi
+          printf "\nNext: %s'%s' install\n" "$elevation" "$quoted_binary"
+          printf 'Local HTTP only; use the SSH tunnel printed by the installer from another computer.\nFor HTTPS: add --domain DNS-NAME.\n'
+          ;;
+      esac
+      printf 'For hosted grund: grund login https://app.grund.sh\n'
     else
-      printf '%s\n' 'This release provides the CLI but not the managed grund install command.'
+      printf '\nNext: grund login\nHosted dashboard: https://app.grund.sh\n'
+      if [ -z "$can_install" ]; then
+        printf '%s\n' 'This release provides the CLI but not the managed grund install command.'
+      else
+        printf '%s\n' 'Managed server installation requires Linux.'
+      fi
     fi
   fi
 }
