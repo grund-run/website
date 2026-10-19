@@ -148,6 +148,8 @@ main() {
   printf '%s\n' "$reported"
   can_install=
   if "$work/$artifact" install --help >/dev/null 2>&1; then can_install=1; fi
+  login='grund login'
+  if "$work/$artifact" auth --help >/dev/null 2>&1; then login='grund auth login'; fi
   if [ -n "$domain" ] && [ -z "$can_install" ]; then
     fail "release $version has no grund install command; choose a newer release"
   fi
@@ -184,9 +186,9 @@ main() {
           printf 'Local HTTP only; use the SSH tunnel printed by the installer from another computer.\nFor HTTPS: add --domain DNS-NAME.\n'
           ;;
       esac
-      printf 'For hosted grund: grund login https://app.grund.sh\n'
+      printf 'For hosted grund: %s https://app.grund.sh\n' "$login"
     else
-      printf '\nNext: grund login\nHosted dashboard: https://app.grund.sh\n'
+      printf '\nNext: %s\nHosted dashboard: https://app.grund.sh\n' "$login"
       if [ -z "$can_install" ]; then
         printf '%s\n' 'This release provides the CLI but not the managed grund install command.'
       else
