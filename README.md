@@ -109,13 +109,15 @@ releases and alphas. An existing release keeps its stable or alpha channel;
 download. A missing stable release does not fall back to alpha. No version
 is embedded in the website.
 
-`--domain` invokes the downloaded `grund install`; the shell no longer owns
+`--domain` invokes the downloaded release's dashboard installer, `grund
+server install` (`grund install` on releases up to alpha.11, which the
+script detects); the shell no longer owns
 Compose or systemd setup. Managed installation is present in alpha.5, not
 alpha.4 and earlier. It needs Linux, root, systemd and Docker Compose v2:
 dashboard and HTTPS first, owner setup then machine enrollment. Reinstall
 preserves the server image, configuration and identity; it is not an upgrade
-and never deploys an app. Flags and retained paths are in `grund install
---help` and `grund uninstall --help`. The homepage labels this alpha and
+and never deploys an app. Flags and retained paths are in `grund server
+install --help` and `grund server uninstall --help`. The homepage labels this alpha and
 links the script before asking users to run it.
 
 ## Run it

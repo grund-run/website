@@ -4,7 +4,8 @@
 #   curl -fsSL https://grund.sh/install | sh
 #   curl -fsSL https://grund.sh/install | sh -s -- --version v0.0.0-alpha.3
 #
-# --domain downloads the CLI, then invokes `grund install --domain NAME`.
+# --domain downloads the CLI, then invokes `grund server install --domain NAME`
+# (`grund install --domain NAME` on releases before it).
 # Server setup requires Linux, root and systemd. Current releases install
 # missing Docker tools from Debian/Ubuntu packages; other systems need
 # Docker Engine and Compose v2 first. No sudo is invoked here.
@@ -26,9 +27,9 @@ grund CLI bootstrap
   --version VERSION   Pin a release, for example v0.0.0-alpha.4
   --channel CHANNEL   stable or alpha (new installs: alpha; existing installs: their channel)
   --bin-dir DIR       Binary directory (default: ~/.local/bin, /usr/local/bin as root)
-  --domain NAME       After downloading, run grund install --domain NAME
-  --code CODE         Pass the one-time machine code to grund install
-  --no-vms            Pass --no-vms to grund install
+  --domain NAME       After downloading, install the dashboard here for NAME
+  --code CODE         Pass the one-time machine code to that installation
+  --no-vms            Pass --no-vms to that installation
   --help              Show this help without changing anything
 
 Without --domain, this downloads only the CLI. With --domain, the downloaded
@@ -146,8 +147,12 @@ main() {
   reported=$("$work/$artifact" --version) || fail 'downloaded executable could not report its version'
   [ "$reported" = "grund $version" ] || fail "downloaded executable does not report grund $version"
   printf '%s\n' "$reported"
-  can_install=
-  if "$work/$artifact" install --help >/dev/null 2>&1; then can_install=1; fi
+  can_install= install_command=
+  if "$work/$artifact" server install --help >/dev/null 2>&1; then
+    can_install=1 install_command='server install'
+  elif "$work/$artifact" install --help >/dev/null 2>&1; then
+    can_install=1 install_command=install
+  fi
   login='grund login'
   if "$work/$artifact" auth --help >/dev/null 2>&1; then login='grund auth login'; fi
   if [ -n "$domain" ] && [ -z "$can_install" ]; then
@@ -165,7 +170,7 @@ main() {
     printf "Add to PATH: export PATH='%s'\"\$PATH\"\n" "$quoted_directory"
     ;; esac
   if [ -n "$domain" ]; then
-    set -- install --domain "$domain" --version "$version"
+    set -- $install_command --domain "$domain" --version "$version"
     [ -z "$code" ] || set -- "$@" --code "$code"
     [ -z "$no_vms" ] || set -- "$@" --no-vms
     "$bin_dir/grund" "$@"
@@ -176,13 +181,13 @@ main() {
       [ "$(id -u)" != 0 ] || elevation=
       case "$version" in
         v0.0.0-alpha.[1-9])
-          printf "\nNext: %s'%s' install --domain grund.example.com\n" "$elevation" "$quoted_binary"
+          printf "\nNext: %s'%s' %s --domain grund.example.com\n" "$elevation" "$quoted_binary" "$install_command"
           ;;
         *)
           if [ "$version" = v0.0.0-alpha.10 ]; then
             printf '\nOn fresh Debian 13, this old release needs docker.io, docker-cli and docker-compose installed first. Choose alpha.11 or newer for automatic setup.\n'
           fi
-          printf "\nNext: %s'%s' install\n" "$elevation" "$quoted_binary"
+          printf "\nNext: %s'%s' %s\n" "$elevation" "$quoted_binary" "$install_command"
           printf 'Local HTTP only; use the SSH tunnel printed by the installer from another computer.\nFor HTTPS: add --domain DNS-NAME.\n'
           ;;
       esac
