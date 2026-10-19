@@ -142,6 +142,7 @@ main() {
   base=https://git.kjuulh.io/api/packages/grund/generic/grund/$version
   curl --proto '=https' --tlsv1.2 --connect-timeout 10 --max-time 60 --max-filesize 1048576 -fsS -o "$work/SHA256SUMS" "$base/SHA256SUMS" || fail "release $version has no published SHA256SUMS"
   artifact=grund-$os-$arch
+  if grep -q "  grund-cli-$os-$arch\$" "$work/SHA256SUMS"; then artifact=grund-cli-$os-$arch; fi
   fetch "$artifact"
   chmod 0755 "$work/$artifact"
   reported=$("$work/$artifact" --version) || fail 'downloaded executable could not report its version'
